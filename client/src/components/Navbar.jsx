@@ -25,17 +25,21 @@ export default function Navbar() {
           <Link to="/properties">Properties</Link>
 
           {user ? (
-            <>
-              <Link to="/dashboard">Dashboard</Link>
+  <>
+    <Link to="/properties">Properties</Link>
 
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 px-3 py-1 rounded hover:bg-red-600"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
+    <Link to="/add-property">Add Property</Link>
+
+    <Link to="/dashboard">Dashboard</Link>
+
+    <button
+      onClick={handleLogout}
+      className="bg-red-500 px-3 py-1 rounded hover:bg-red-600"
+    >
+      Logout
+    </button>
+  </>
+) : (
             <>
               <Link to="/login">Login</Link>
 

@@ -33,8 +33,14 @@ function App() {
     </ProtectedRoute>
   }
 />
-            <Route path="/add-property" element={<AddProperty />} />
-            <Route path="/edit-property/:id" element={<EditProperty />} />
+            <Route
+  path="/add-property"
+  element={
+    <ProtectedRoute>
+      <AddProperty />
+    </ProtectedRoute>
+  }
+/>
           </Routes>
         </main>
 
