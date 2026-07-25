@@ -10,7 +10,6 @@ import Properties from "./pages/Properties";
 import PropertyDetails from "./pages/PropertyDetails";
 import Dashboard from "./pages/Dashboard";
 import AddProperty from "./pages/AddProperty";
-import EditProperty from "./pages/EditProperty";
 
 function App() {
   return (
