@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
 
-export default function PropertyCard({ property }) {
+export default function PropertyCard({
+  property,
+  onDelete,
+}) {
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
 
@@ -39,6 +42,13 @@ export default function PropertyCard({ property }) {
   >
     Edit
   </Link>
+
+  <button
+    onClick={() => onDelete(property._id)}
+    className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+  >
+    Delete
+  </button>
 
 </div>
 

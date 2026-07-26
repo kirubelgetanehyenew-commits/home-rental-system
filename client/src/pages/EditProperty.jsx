@@ -19,10 +19,6 @@ export default function EditProperty() {
 
   const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    fetchProperty();
-  }, []);
-
   async function fetchProperty() {
     try {
       const res = await API.get(`/properties/${id}`);
@@ -42,6 +38,10 @@ export default function EditProperty() {
       console.log(err);
     }
   }
+
+  useEffect(() => {
+    fetchProperty();
+  }, []);
 
   function handleChange(e) {
     setFormData({
