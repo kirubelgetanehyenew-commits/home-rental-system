@@ -40,6 +40,7 @@ function App() {
     </ProtectedRoute>
   }
 />
+
           </Routes>
         </main>
 
