@@ -24,12 +24,23 @@ export default function PropertyCard({ property }) {
           ETB {property.price}
         </p>
 
-        <Link
-          to={`/property/${property._id}`}
-          className="inline-block mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          View Details
-        </Link>
+        <div className="flex gap-3 mt-4">
+
+  <Link
+    to={`/property/${property._id}`}
+    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+  >
+    View Details
+  </Link>
+
+  <Link
+    to={`/edit-property/${property._id}`}
+    className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
+  >
+    Edit
+  </Link>
+
+</div>
 
       </div>
 

@@ -19,35 +19,31 @@ export default function Navbar() {
         </Link>
 
         <div className="flex gap-6 items-center">
+  <Link to="/">Home</Link>
 
-          <Link to="/">Home</Link>
+  <Link to="/properties">Properties</Link>
 
-          <Link to="/properties">Properties</Link>
+  {user ? (
+    <>
+      <Link to="/add-property">Add Property</Link>
 
-          {user ? (
-  <>
-    <Link to="/properties">Properties</Link>
+      <Link to="/dashboard">Dashboard</Link>
 
-    <Link to="/add-property">Add Property</Link>
+      <button
+        onClick={handleLogout}
+        className="bg-red-500 px-3 py-1 rounded hover:bg-red-600"
+      >
+        Logout
+      </button>
+    </>
+  ) : (
+    <>
+      <Link to="/login">Login</Link>
 
-    <Link to="/dashboard">Dashboard</Link>
-
-    <button
-      onClick={handleLogout}
-      className="bg-red-500 px-3 py-1 rounded hover:bg-red-600"
-    >
-      Logout
-    </button>
-  </>
-) : (
-            <>
-              <Link to="/login">Login</Link>
-
-              <Link to="/register">Register</Link>
-            </>
-          )}
-
-        </div>
+      <Link to="/register">Register</Link>
+    </>
+  )}
+</div>
 
       </div>
     </nav>
