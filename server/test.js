@@ -1,14 +1,18 @@
-const mongoose = require("mongoose");
+const { connectDB, disconnectDB } = require("./config/db");
 require("dotenv").config();
 
 const User = require("./models/User");
 
-mongoose.connect(process.env.MONGO_URI).then(async () => {
-  console.log("MongoDB Connected");
+connectDB()
+  .then(async () => {
+    const users = await User.find();
 
-  const users = await User.find();
+    console.log(users);
 
-  console.log(users);
-
-  process.exit();
-});
+    await disconnectDB();
+    process.exit();
+  })
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });

@@ -4,6 +4,10 @@ const path = require("path");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const propertyRoutes = require("./routes/propertyRoutes");
+const favoriteRoutes = require("./routes/favoriteRoutes");
+const bookingRoutes = require("./routes/bookingRoutes");
+const reviewRoutes = require("./routes/reviewRoutes");
+const statsRoutes = require("./routes/statsRoutes");
 
 const app = express();
 
@@ -22,6 +26,10 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/properties", propertyRoutes);
+app.use("/api/favorites", favoriteRoutes);
+app.use("/api/bookings", bookingRoutes);
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/stats", statsRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

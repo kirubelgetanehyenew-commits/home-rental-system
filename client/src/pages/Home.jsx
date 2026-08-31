@@ -1,99 +1,90 @@
 import { Link } from "react-router-dom";
+import { useLang } from "../context/LanguageContext";
 
 export default function Home() {
+  const { t } = useLang();
+
   return (
     <div>
-      {/* Hero Section */}
-      <section className="bg-blue-600 text-white py-20">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h1 className="text-5xl font-bold mb-6">
-            Find Your Perfect Home
+      <section className="relative overflow-hidden py-24 text-stone-900 dark:text-zinc-100">
+        <div className="absolute inset-x-0 top-0 h-72 bg-gradient-to-r from-orange-300/30 via-transparent to-rose-300/20 blur-3xl dark:from-orange-500/15 dark:to-rose-500/10" />
+        <div className="relative max-w-6xl mx-auto px-6 text-center">
+          <p className="mb-4 text-sm uppercase tracking-[0.35em] text-orange-600/90 dark:text-orange-400/90">
+            {t("home.tagline")}
+          </p>
+          <h1 className="text-5xl md:text-6xl font-semibold tracking-tight leading-tight">
+            {t("home.title")}
           </h1>
-
-          <p className="text-xl mb-8">
-            Browse apartments, houses, and rental properties across Ethiopia.
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-stone-600 dark:text-zinc-300">
+            {t("home.subtitle")}
           </p>
 
-          <div className="flex justify-center gap-4">
+          <div className="mt-10 flex flex-col gap-4 sm:flex-row justify-center">
             <Link
               to="/properties"
-              className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200"
+              className="inline-flex items-center justify-center rounded-full bg-orange-500 px-7 py-3 text-base font-semibold text-white transition hover:bg-orange-600"
             >
-              Browse Properties
+              {t("home.browse")}
             </Link>
-
             <Link
               to="/register"
-              className="border border-white px-6 py-3 rounded-lg hover:bg-white hover:text-blue-600"
+              className="inline-flex items-center justify-center rounded-full border border-stone-300 bg-white/80 px-7 py-3 text-base font-semibold text-stone-700 transition hover:border-orange-400 dark:border-zinc-700 dark:bg-zinc-900/80 dark:text-zinc-200 dark:hover:border-orange-400"
             >
-              Get Started
+              {t("home.getStarted")}
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Search Section */}
-      <section className="max-w-6xl mx-auto px-6 py-10">
-        <div className="bg-white shadow-lg rounded-lg p-6">
-          <h2 className="text-2xl font-bold mb-4">
-            Search Properties
-          </h2>
-
-          <div className="grid md:grid-cols-4 gap-4">
+      <section className="max-w-6xl mx-auto px-6 py-14">
+        <div className="rounded-3xl border border-stone-200 bg-white p-8 shadow-xl shadow-stone-200/50 dark:border-zinc-800 dark:bg-zinc-900/90 dark:shadow-black/30">
+          <h2 className="text-3xl font-semibold mb-6">{t("home.quickTitle")}</h2>
+          <div className="grid gap-4 md:grid-cols-4">
             <input
               type="text"
-              placeholder="Location"
-              className="border p-3 rounded"
+              placeholder={t("home.location")}
+              className="rounded-3xl border border-stone-300 bg-white px-4 py-3 placeholder:text-stone-400 focus:border-orange-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950/80 dark:placeholder:text-zinc-500"
             />
-
             <input
               type="number"
-              placeholder="Max Price"
-              className="border p-3 rounded"
+              placeholder={t("home.maxPrice")}
+              className="rounded-3xl border border-stone-300 bg-white px-4 py-3 placeholder:text-stone-400 focus:border-orange-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950/80 dark:placeholder:text-zinc-500"
             />
-
-            <select className="border p-3 rounded">
-              <option>Bedrooms</option>
-              <option>1 Bedroom</option>
-              <option>2 Bedrooms</option>
-              <option>3 Bedrooms</option>
-              <option>4+ Bedrooms</option>
+            <select className="rounded-3xl border border-stone-300 bg-white px-4 py-3 focus:border-orange-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950/80">
+              <option>{t("home.bedrooms")}</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4+</option>
             </select>
-
-            <button className="bg-blue-600 text-white rounded hover:bg-blue-700">
-              Search
+            <button className="rounded-3xl bg-orange-500 py-3 text-base font-semibold text-white transition hover:bg-orange-600">
+              {t("home.search")}
             </button>
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="max-w-7xl mx-auto px-6 py-10">
-        <h2 className="text-3xl font-bold text-center mb-10">
-          Why Choose Us?
+      <section className="max-w-7xl mx-auto px-6 pb-20">
+        <h2 className="text-3xl font-semibold text-center mb-10">
+          {t("home.whyTitle")}
         </h2>
-
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="bg-white shadow rounded-lg p-6">
-            <h3 className="text-xl font-bold mb-3">Verified Listings</h3>
-            <p>
-              Every property is reviewed before appearing on the platform.
-            </p>
-          </div>
-
-          <div className="bg-white shadow rounded-lg p-6">
-            <h3 className="text-xl font-bold mb-3">Easy Search</h3>
-            <p>
-              Quickly find homes using location, price, and bedroom filters.
-            </p>
-          </div>
-
-          <div className="bg-white shadow rounded-lg p-6">
-            <h3 className="text-xl font-bold mb-3">Secure Platform</h3>
-            <p>
-              Protected accounts and secure property management for landlords.
-            </p>
-          </div>
+        <div className="grid gap-6 md:grid-cols-3">
+          {[
+            { icon: "✅", title: t("home.verified.title"), desc: t("home.verified.desc") },
+            { icon: "🔍", title: t("home.smart.title"), desc: t("home.smart.desc") },
+            { icon: "🔒", title: t("home.secure.title"), desc: t("home.secure.desc") },
+          ].map((card) => (
+            <div
+              key={card.title}
+              className="rounded-3xl border border-stone-200 bg-white p-8 shadow-lg shadow-stone-200/50 transition hover:-translate-y-1 dark:border-zinc-800 dark:bg-zinc-900/90 dark:shadow-black/30"
+            >
+              <div className="mb-3 text-3xl">{card.icon}</div>
+              <h3 className="text-xl font-semibold text-orange-600 mb-3 dark:text-orange-400">
+                {card.title}
+              </h3>
+              <p className="text-stone-600 dark:text-zinc-300">{card.desc}</p>
+            </div>
+          ))}
         </div>
       </section>
     </div>

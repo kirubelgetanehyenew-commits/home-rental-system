@@ -5,17 +5,12 @@ const protect = async (req, res, next) => {
   let token;
 
   try {
-    // Check Authorization Header
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer")
     ) {
       token = req.headers.authorization.split(" ")[1];
-
-      // Verify Token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-      // Get Logged-in User
       req.user = await User.findById(decoded.id).select("-password");
 
       if (!req.user) {
@@ -40,4 +35,17 @@ const protect = async (req, res, next) => {
   }
 };
 
-module.exports = { protect };
+const authorizeRoles = (...roles) => {
+  return (req, res, next) => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Insufficient permissions.",
+      });
+    }
+
+    next();
+  };
+};
+
+module.exports = { protect, authorizeRoles };

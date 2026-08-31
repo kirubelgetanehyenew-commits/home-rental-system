@@ -1,9 +1,15 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useLang } from "../context/LanguageContext";
 import API from "../services/api";
+
+const inputClass =
+  "w-full rounded-3xl border border-stone-300 bg-white px-4 py-3 text-stone-900 placeholder:text-stone-400 focus:border-orange-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950/80 dark:text-zinc-100 dark:placeholder:text-zinc-500";
 
 export default function Register() {
   const navigate = useNavigate();
+  const { t } = useLang();
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -13,8 +19,10 @@ export default function Register() {
     role: "tenant",
   });
 
+  const { login } = useAuth();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   function handleChange(e) {
     setFormData({
@@ -28,100 +36,120 @@ export default function Register() {
 
     setLoading(true);
     setMessage("");
+    setError("");
 
     try {
-      await API.post("/auth/register", formData);
+      const res = await API.post("/auth/register", formData);
 
-      setMessage("Registration successful!");
+      // Auto-login
+      login(res.data.user, res.data.token);
+
+      setMessage("✅ " + t("register.success"));
 
       setTimeout(() => {
-        navigate("/login");
-      }, 1500);
-
+        navigate("/dashboard");
+      }, 800);
     } catch (err) {
-      setMessage(
-        err.response?.data?.message || "Registration failed."
-      );
+      setError(err.response?.data?.message || "Registration failed.");
     }
 
     setLoading(false);
   }
 
   return (
-    <div className="max-w-lg mx-auto mt-10 bg-white shadow-lg rounded-lg p-8">
-
-      <h1 className="text-3xl font-bold text-center mb-6">
-        Register
-      </h1>
-
-      {message && (
-        <div className="mb-4 p-3 rounded bg-gray-100">
-          {message}
+    <div className="min-h-[calc(100vh-160px)] flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-xl rounded-[2rem] border border-stone-200 bg-white p-8 shadow-xl shadow-stone-200/50 dark:border-zinc-800 dark:bg-zinc-900/95 dark:shadow-black/30">
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl font-semibold">{t("register.title")}</h1>
+          <p className="mt-3 text-stone-500 dark:text-zinc-400">
+            {t("register.subtitle")}
+          </p>
         </div>
-      )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+        {message && (
+          <div className="mb-5 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-emerald-700 dark:text-emerald-300">
+            {message}
+          </div>
+        )}
 
-        <input
-          type="text"
-          name="fullName"
-          placeholder="Full Name"
-          value={formData.fullName}
-          onChange={handleChange}
-          className="w-full border p-3 rounded"
-          required
-        />
+        {error && (
+          <div className="mb-5 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-rose-700 dark:text-rose-300">
+            {error}
+          </div>
+        )}
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          className="w-full border p-3 rounded"
-          required
-        />
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <input
+              type="text"
+              name="fullName"
+              placeholder={t("form.fullName")}
+              value={formData.fullName}
+              onChange={handleChange}
+              className={inputClass}
+              required
+            />
+            <input
+              type="email"
+              name="email"
+              placeholder={t("form.email")}
+              value={formData.email}
+              onChange={handleChange}
+              className={inputClass}
+              required
+            />
+          </div>
 
-        <input
-          type="text"
-          name="phone"
-          placeholder="Phone Number"
-          value={formData.phone}
-          onChange={handleChange}
-          className="w-full border p-3 rounded"
-          required
-        />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <input
+              type="text"
+              name="phone"
+              placeholder={t("form.phone")}
+              value={formData.phone}
+              onChange={handleChange}
+              className={inputClass}
+              required
+            />
+            <input
+              type="password"
+              name="password"
+              placeholder={t("form.password")}
+              value={formData.password}
+              onChange={handleChange}
+              className={inputClass}
+              required
+            />
+          </div>
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          className="w-full border p-3 rounded"
-          required
-        />
+          <select
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            className={inputClass}
+          >
+            <option value="tenant">{t("register.tenant")}</option>
+            <option value="landlord">{t("register.landlord")}</option>
+          </select>
 
-        <select
-          name="role"
-          value={formData.role}
-          onChange={handleChange}
-          className="w-full border p-3 rounded"
-        >
-          <option value="tenant">Tenant</option>
-          <option value="landlord">Landlord</option>
-        </select>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-full bg-orange-500 py-3 text-base font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {loading ? t("register.loading") : t("register.button")}
+          </button>
+        </form>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700"
-        >
-          {loading ? "Registering..." : "Register"}
-        </button>
-
-      </form>
-
+        <p className="mt-6 text-center text-stone-500 dark:text-zinc-400">
+          {t("register.haveAccount")}{" "}
+          <Link
+            to="/login"
+            className="font-semibold text-orange-600 hover:text-orange-500 dark:text-orange-400 dark:hover:text-orange-300"
+          >
+            {t("register.logIn")}
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }
