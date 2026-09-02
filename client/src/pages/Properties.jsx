@@ -17,9 +17,6 @@ const PROPERTY_TYPES = [
   "Guest House",
 ];
 
-const inputClass =
-  "w-full rounded-lg border border-stone-300 bg-white p-3 text-stone-900 placeholder:text-stone-400 focus:border-orange-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950/80 dark:text-zinc-100 dark:placeholder:text-zinc-500";
-
 const defaultFilters = {
   keyword: "",
   propertyType: "",
@@ -143,162 +140,149 @@ export default function Properties() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto py-10 px-6">
+    <div className="page page--properties">
+      <div className="container container--wide">
+        <h1 className="page-title page-title--lg">{t("properties.title")}</h1>
 
-      <h1 className="text-4xl font-bold mb-8">{t("properties.title")}</h1>
+        {/* ============ Search & Filters ============ */}
+        <form onSubmit={handleSearch} className="card" style={{ marginBottom: 24 }}>
+          <div className="grid grid--3">
+            <input
+              name="keyword"
+              placeholder={t("properties.searchPlaceholder")}
+              value={filters.keyword}
+              onChange={handleChange}
+              className="input"
+            />
 
-      {/* ============ Search & Filters ============ */}
-      <form
-        onSubmit={handleSearch}
-        className="bg-white shadow-lg rounded-lg p-6 mb-8 dark:bg-zinc-900 dark:shadow-black/30"
-      >
-        <div className="grid gap-4 md:grid-cols-5">
+            <select
+              name="propertyType"
+              value={filters.propertyType}
+              onChange={handleChange}
+              className="select"
+            >
+              <option value="">{t("properties.allTypes")}</option>
+              {PROPERTY_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {t(`type.${type}`)}
+                </option>
+              ))}
+            </select>
 
-          <input
-            name="keyword"
-            placeholder={t("properties.searchPlaceholder")}
-            value={filters.keyword}
-            onChange={handleChange}
-            className={`${inputClass} md:col-span-2`}
-          />
+            <select
+              name="minBedrooms"
+              value={filters.minBedrooms}
+              onChange={handleChange}
+              className="select"
+            >
+              <option value="">{t("properties.anyBedrooms")}</option>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <option key={n} value={n}>
+                  {n}+ {t("properties.bedroomsMin")}
+                </option>
+              ))}
+            </select>
 
-          <select
-            name="propertyType"
-            value={filters.propertyType}
-            onChange={handleChange}
-            className={inputClass}
-          >
-            <option value="">{t("properties.allTypes")}</option>
-            {PROPERTY_TYPES.map((type) => (
-              <option key={type} value={type}>
-                {t(`type.${type}`)}
-              </option>
+            <select
+              name="sort"
+              value={filters.sort}
+              onChange={handleChange}
+              className="select"
+            >
+              <option value="newest">{t("properties.sort.newest")}</option>
+              <option value="oldest">{t("properties.sort.oldest")}</option>
+              <option value="price_asc">{t("properties.sort.priceAsc")}</option>
+              <option value="price_desc">{t("properties.sort.priceDesc")}</option>
+            </select>
+
+            <input
+              type="number"
+              name="minPrice"
+              placeholder={t("properties.minPrice")}
+              value={filters.minPrice}
+              onChange={handleChange}
+              className="input"
+            />
+
+            <input
+              type="number"
+              name="maxPrice"
+              placeholder={t("properties.maxPrice")}
+              value={filters.maxPrice}
+              onChange={handleChange}
+              className="input"
+            />
+
+            <div className="row">
+              <button className="btn btn--primary spread">
+                {t("properties.search")}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleReset}
+                className="btn btn--outline spread"
+              >
+                {t("properties.reset")}
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <p className="soft" style={{ marginBottom: 16 }}>
+          {total} {total === 1 ? t("properties.foundOne") : t("properties.found")}
+        </p>
+
+        {loading ? (
+          <div className="loading">{t("common.loading")}</div>
+        ) : properties.length === 0 ? (
+          <div className="empty">{t("properties.none")}</div>
+        ) : (
+          <div className="grid grid--cards">
+            {properties.map((property) => (
+              <PropertyCard
+                key={property._id}
+                property={property}
+                showActions={user?.id === property.owner?._id}
+                onDelete={handleDelete}
+                favorited={favoritedIds.includes(property._id)}
+                onToggleFavorite={handleToggleFavorite}
+              />
             ))}
-          </select>
+          </div>
+        )}
 
-          <select
-            name="minBedrooms"
-            value={filters.minBedrooms}
-            onChange={handleChange}
-            className={inputClass}
-          >
-            <option value="">{t("properties.anyBedrooms")}</option>
-            {[1, 2, 3, 4, 5].map((n) => (
-              <option key={n} value={n}>
-                {n}+ {t("properties.bedroomsMin")}
-              </option>
-            ))}
-          </select>
-
-          <select
-            name="sort"
-            value={filters.sort}
-            onChange={handleChange}
-            className={inputClass}
-          >
-            <option value="newest">{t("properties.sort.newest")}</option>
-            <option value="oldest">{t("properties.sort.oldest")}</option>
-            <option value="price_asc">{t("properties.sort.priceAsc")}</option>
-            <option value="price_desc">{t("properties.sort.priceDesc")}</option>
-          </select>
-
-          <input
-            type="number"
-            name="minPrice"
-            placeholder={t("properties.minPrice")}
-            value={filters.minPrice}
-            onChange={handleChange}
-            className={inputClass}
-          />
-
-          <input
-            type="number"
-            name="maxPrice"
-            placeholder={t("properties.maxPrice")}
-            value={filters.maxPrice}
-            onChange={handleChange}
-            className={inputClass}
-          />
-
-          <div className="flex gap-3 md:col-span-2">
-            <button className="flex-1 bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600">
-              {t("properties.search")}
+        {/* ============ Pagination ============ */}
+        {pages > 1 && (
+          <div className="tabs" style={{ justifyContent: "center", marginTop: 40 }}>
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="tab"
+            >
+              ← {t("properties.prev")}
             </button>
 
+            {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
+              <button
+                key={p}
+                onClick={() => setPage(p)}
+                className={`tab${p === page ? " tab--active" : ""}`}
+              >
+                {p}
+              </button>
+            ))}
+
             <button
-              type="button"
-              onClick={handleReset}
-              className="flex-1 bg-stone-200 text-stone-700 py-3 rounded-lg font-semibold hover:bg-stone-300 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+              onClick={() => setPage((p) => Math.min(pages, p + 1))}
+              disabled={page === pages}
+              className="tab"
             >
-              {t("properties.reset")}
+              {t("properties.next")} →
             </button>
           </div>
-
-        </div>
-      </form>
-
-      <p className="text-stone-500 mb-4 dark:text-zinc-400">
-        {total} {total === 1 ? t("properties.foundOne") : t("properties.found")}
-      </p>
-
-      {loading ? (
-        <div className="text-center py-10 text-xl">{t("common.loading")}</div>
-      ) : properties.length === 0 ? (
-        <div className="rounded-lg bg-white shadow p-8 text-center dark:bg-zinc-900">
-          <p className="text-stone-600 dark:text-zinc-400">
-            {t("properties.none")}
-          </p>
-        </div>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-3">
-          {properties.map((property) => (
-            <PropertyCard
-              key={property._id}
-              property={property}
-              showActions={user?.id === property.owner?._id}
-              onDelete={handleDelete}
-              favorited={favoritedIds.includes(property._id)}
-              onToggleFavorite={handleToggleFavorite}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* ============ Pagination ============ */}
-      {pages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-10">
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="px-4 py-2 rounded bg-stone-200 disabled:opacity-50 hover:bg-stone-300 dark:bg-zinc-800 dark:hover:bg-zinc-700"
-          >
-            ← {t("properties.prev")}
-          </button>
-
-          {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
-            <button
-              key={p}
-              onClick={() => setPage(p)}
-              className={`h-10 w-10 rounded font-semibold ${
-                p === page
-                  ? "bg-orange-500 text-white"
-                  : "bg-stone-200 hover:bg-stone-300 dark:bg-zinc-800 dark:hover:bg-zinc-700"
-              }`}
-            >
-              {p}
-            </button>
-          ))}
-
-          <button
-            onClick={() => setPage((p) => Math.min(pages, p + 1))}
-            disabled={page === pages}
-            className="px-4 py-2 rounded bg-stone-200 disabled:opacity-50 hover:bg-stone-300 dark:bg-zinc-800 dark:hover:bg-zinc-700"
-          >
-            {t("properties.next")} →
-          </button>
-        </div>
-      )}
-
+        )}
+      </div>
     </div>
   );
 }

@@ -3,9 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useLang } from "../context/LanguageContext";
 import API from "../services/api";
 
-const inputClass =
-  "w-full rounded-lg border border-stone-300 bg-white p-3 text-stone-900 placeholder:text-stone-400 focus:border-orange-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950/80 dark:text-zinc-100 dark:placeholder:text-zinc-500";
-
 const PROPERTY_TYPES = [
   "Apartment",
   "Villa",
@@ -83,7 +80,6 @@ export default function AddProperty() {
       setTimeout(() => {
         navigate("/properties");
       }, 1200);
-
     } catch (err) {
       setMessage(
         "❌ " + (err.response?.data?.message || "Failed to add property.")
@@ -92,124 +88,122 @@ export default function AddProperty() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 bg-white shadow-lg rounded-lg p-8 dark:bg-zinc-900 dark:shadow-black/30">
-      <h1 className="text-3xl font-bold mb-6">
-        {t("add.title")}
-      </h1>
+    <div className="page page--form">
+      <div className="container container--narrow">
+        <div className="card card--pad-lg">
+          <h1 className="page-title">{t("add.title")}</h1>
 
-      {message && (
-        <div className="mb-4 p-3 bg-stone-100 rounded dark:bg-zinc-800">
-          {message}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-
-        <input
-          name="title"
-          placeholder={t("add.propertyTitle")}
-          onChange={handleChange}
-          className={inputClass}
-          required
-        />
-
-        <textarea
-          name="description"
-          placeholder={t("add.description")}
-          onChange={handleChange}
-          className={inputClass}
-          rows="4"
-          required
-        />
-
-        <input
-          type="number"
-          name="price"
-          placeholder={t("add.price")}
-          onChange={handleChange}
-          className={inputClass}
-          required
-        />
-
-        <input
-          name="location"
-          placeholder={t("add.location")}
-          onChange={handleChange}
-          className={inputClass}
-          required
-        />
-
-        <input
-          type="number"
-          name="bedrooms"
-          placeholder={t("add.bedrooms")}
-          onChange={handleChange}
-          className={inputClass}
-          required
-        />
-
-        <input
-          type="number"
-          name="bathrooms"
-          placeholder={t("add.bathrooms")}
-          onChange={handleChange}
-          className={inputClass}
-          required
-        />
-
-        <input
-          type="number"
-          name="area"
-          placeholder={t("add.area")}
-          onChange={handleChange}
-          className={inputClass}
-          required
-        />
-
-        <select
-          name="propertyType"
-          onChange={handleChange}
-          className={inputClass}
-        >
-          {PROPERTY_TYPES.map((type) => (
-            <option key={type} value={type}>
-              {t(`type.${type}`)}
-            </option>
-          ))}
-        </select>
-
-        <div>
-          <label className="block text-sm font-semibold text-stone-600 mb-1 dark:text-zinc-300">
-            {t("add.photos")}
-          </label>
-
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleImageChange}
-            className="w-full rounded-lg border border-stone-300 p-3 dark:border-zinc-700 dark:bg-zinc-950/80"
-          />
-
-          {imagePreviews.length > 0 && (
-            <div className="flex gap-2 mt-3">
-              {imagePreviews.map((src, index) => (
-                <img
-                  key={index}
-                  src={src}
-                  alt={`Preview ${index + 1}`}
-                  className="h-20 w-24 object-cover rounded"
-                />
-              ))}
+          {message && (
+            <div className="alert alert--info" style={{ margin: "16px 0" }}>
+              {message}
             </div>
           )}
+
+          <form onSubmit={handleSubmit} className="form">
+            <input
+              name="title"
+              placeholder={t("add.propertyTitle")}
+              onChange={handleChange}
+              className="input"
+              required
+            />
+
+            <textarea
+              name="description"
+              placeholder={t("add.description")}
+              onChange={handleChange}
+              className="textarea"
+              rows="4"
+              required
+            />
+
+            <div className="grid grid--2">
+              <input
+                type="number"
+                name="price"
+                placeholder={t("add.price")}
+                onChange={handleChange}
+                className="input"
+                required
+              />
+
+              <input
+                name="location"
+                placeholder={t("add.location")}
+                onChange={handleChange}
+                className="input"
+                required
+              />
+            </div>
+
+            <div className="grid grid--3">
+              <input
+                type="number"
+                name="bedrooms"
+                placeholder={t("add.bedrooms")}
+                onChange={handleChange}
+                className="input"
+                required
+              />
+
+              <input
+                type="number"
+                name="bathrooms"
+                placeholder={t("add.bathrooms")}
+                onChange={handleChange}
+                className="input"
+                required
+              />
+
+              <input
+                type="number"
+                name="area"
+                placeholder={t("add.area")}
+                onChange={handleChange}
+                className="input"
+                required
+              />
+            </div>
+
+            <select name="propertyType" onChange={handleChange} className="select">
+              {PROPERTY_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {t(`type.${type}`)}
+                </option>
+              ))}
+            </select>
+
+            <div className="form-group">
+              <label className="label">{t("add.photos")}</label>
+
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageChange}
+                className="input"
+              />
+
+              {imagePreviews.length > 0 && (
+                <div className="row row--wrap" style={{ marginTop: 12 }}>
+                  {imagePreviews.map((src, index) => (
+                    <img
+                      key={index}
+                      src={src}
+                      alt={`Preview ${index + 1}`}
+                      className="thumb"
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <button className="btn btn--primary btn--lg btn--block">
+              {t("add.button")}
+            </button>
+          </form>
         </div>
-
-        <button className="w-full bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600">
-          {t("add.button")}
-        </button>
-
-      </form>
+      </div>
     </div>
   );
 }

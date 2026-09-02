@@ -3,9 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useLang } from "../context/LanguageContext";
 import API from "../services/api";
 
-const inputClass =
-  "w-full rounded-lg border border-stone-300 bg-white p-3 text-stone-900 placeholder:text-stone-400 focus:border-orange-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950/80 dark:text-zinc-100 dark:placeholder:text-zinc-500";
-
 export default function Profile() {
   const navigate = useNavigate();
   const { t } = useLang();
@@ -112,81 +109,87 @@ export default function Profile() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto py-10 px-6">
-      <h1 className="text-3xl font-bold mb-6">{t("profile.title")}</h1>
+    <div className="page page--plain">
+      <div className="container container--narrow">
+        <h1 className="page-title">{t("profile.title")}</h1>
 
-      {message && (
-        <div className="mb-4 p-3 rounded bg-stone-100 dark:bg-zinc-800">
-          {message}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          name="fullName"
-          value={formData.fullName}
-          onChange={handleChange}
-          className={inputClass}
-          placeholder={t("form.fullName")}
-          required
-        />
-
-        <input
-          name="phone"
-          value={formData.phone}
-          onChange={handleChange}
-          className={inputClass}
-          placeholder={t("form.phone")}
-        />
-
-        <input
-          name="address"
-          value={formData.address}
-          onChange={handleChange}
-          className={inputClass}
-          placeholder={t("profile.address")}
-        />
-
-        <textarea
-          name="bio"
-          value={formData.bio}
-          onChange={handleChange}
-          className={inputClass}
-          placeholder={t("profile.bio")}
-          rows={4}
-        />
-
-        <div className="space-y-2">
-          <label className="block text-sm text-stone-500 dark:text-zinc-400">
-            {t("profile.avatar")}
-          </label>
-          <div className="flex items-center gap-4">
-            <div className="w-20 h-20 rounded-full bg-stone-200 overflow-hidden dark:bg-zinc-800">
-              {avatarPreview || formData.profileImage ? (
-                <img src={avatarPreview || formData.profileImage} alt="avatar" className="w-full h-full object-cover" />
-              ) : null}
-            </div>
-
-            <input type="file" accept="image/*" onChange={handleAvatarChange} />
+        {message && (
+          <div className="alert alert--info" style={{ marginBottom: 16 }}>
+            {message}
           </div>
-        </div>
+        )}
 
-        <div className="flex gap-3">
-          <button
-            type="submit"
-            className="rounded-full bg-orange-500 px-6 py-2 text-white font-semibold hover:bg-orange-600"
-          >
-            {t("profile.save")}
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="rounded-full border border-stone-300 px-6 py-2 hover:border-orange-400 dark:border-zinc-700 dark:hover:border-orange-400"
-          >
-            {t("profile.cancel")}
-          </button>
-        </div>
-      </form>
+        <form onSubmit={handleSubmit} className="card form">
+          <input
+            name="fullName"
+            value={formData.fullName}
+            onChange={handleChange}
+            className="input"
+            placeholder={t("form.fullName")}
+            required
+          />
+
+          <input
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+            className="input"
+            placeholder={t("form.phone")}
+          />
+
+          <input
+            name="address"
+            value={formData.address}
+            onChange={handleChange}
+            className="input"
+            placeholder={t("profile.address")}
+          />
+
+          <textarea
+            name="bio"
+            value={formData.bio}
+            onChange={handleChange}
+            className="textarea"
+            placeholder={t("profile.bio")}
+            rows={4}
+          />
+
+          <div className="form-group">
+            <label className="label">{t("profile.avatar")}</label>
+            <div className="row row--center">
+              <div
+                className="avatar avatar--lg"
+                style={{ width: 72, height: 72, fontSize: 26, overflow: "hidden" }}
+              >
+                {avatarPreview || formData.profileImage ? (
+                  <img
+                    src={avatarPreview || formData.profileImage}
+                    alt="avatar"
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                ) : (
+                  formData.fullName?.[0] || "?"
+                )}
+              </div>
+
+              <input type="file" accept="image/*" onChange={handleAvatarChange} />
+            </div>
+          </div>
+
+          <div className="form-actions">
+            <button type="submit" className="btn btn--primary">
+              {t("profile.save")}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="btn btn--outline"
+            >
+              {t("profile.cancel")}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

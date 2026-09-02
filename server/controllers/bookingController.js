@@ -1,5 +1,6 @@
 const Booking = require("../models/Booking");
 const Property = require("../models/Property");
+const { createNotification } = require("./notificationController");
 
 // Create a viewing request
 const createBooking = async (req, res) => {
@@ -33,6 +34,15 @@ const createBooking = async (req, res) => {
       date,
       time,
       message,
+    });
+
+    // Notify the landlord about the new viewing request
+    await createNotification({
+      user: property.owner,
+      title: "New viewing request",
+      body: `${req.user.fullName} requested a viewing for "${property.title}"`,
+      type: "booking",
+      link: "/bookings",
     });
 
     res.status(201).json({
@@ -126,6 +136,17 @@ const updateBookingStatus = async (req, res) => {
 
     booking.status = status;
     await booking.save();
+
+    // Notify the tenant about the decision
+    if (["approved", "rejected"].includes(status)) {
+      await createNotification({
+        user: booking.tenant,
+        title: `Booking ${status}`,
+        body: `Your viewing request for "${booking.property.title}" was ${status}`,
+        type: "booking",
+        link: "/bookings",
+      });
+    }
 
     res.status(200).json({
       success: true,

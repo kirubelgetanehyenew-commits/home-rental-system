@@ -26,31 +26,29 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-160px)] flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-xl rounded-[2rem] border border-stone-200 bg-white p-8 shadow-xl shadow-stone-200/50 dark:border-zinc-800 dark:bg-zinc-900/95 dark:shadow-black/30">
-        <h2 className="text-2xl font-semibold mb-4">{t("reset.title")}</h2>
+    <div className="page page--auth">
+      <div className="container container--narrow container--center">
+        <div className="auth-card">
+          <h1 className="auth-card__title">{t("reset.title")}</h1>
 
-        {message && (
-          <div className="mb-4 text-emerald-700 dark:text-emerald-300">{message}</div>
-        )}
-        {error && (
-          <div className="mb-4 text-rose-700 dark:text-rose-300">{error}</div>
-        )}
+          {message && <div className="alert alert--success">{message}</div>}
+          {error && <div className="alert alert--error">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="password"
-            placeholder={t("reset.newPassword")}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="w-full rounded-3xl border border-stone-300 bg-white px-4 py-3 placeholder:text-stone-400 focus:border-orange-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950/80 dark:text-zinc-100 dark:placeholder:text-zinc-500"
-          />
+          <form onSubmit={handleSubmit} className="form">
+            <input
+              type="password"
+              placeholder={t("reset.newPassword")}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="input"
+            />
 
-          <button className="w-full rounded-full bg-orange-500 py-3 text-white font-semibold hover:bg-orange-600">
-            {t("reset.button")}
-          </button>
-        </form>
+            <button className="btn btn--primary btn--lg btn--block">
+              {t("reset.button")}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

@@ -153,7 +153,7 @@ const getProperties = async (req, res) => {
 
     const [properties, total] = await Promise.all([
       Property.find(query)
-        .populate("owner", "fullName email phone")
+        .populate("owner", "fullName email phone isVerified")
         .sort(sort)
         .skip(skip)
         .limit(limit),
@@ -181,7 +181,7 @@ const getProperty = async (req, res) => {
   try {
     const property = await Property.findById(req.params.id).populate(
       "owner",
-      "fullName email phone"
+      "fullName email phone isVerified"
     );
 
     if (!property) {
@@ -307,7 +307,7 @@ const getMyProperties = async (req, res) => {
   try {
     const properties = await Property.find({
       owner: req.user._id,
-    }).populate("owner", "fullName email phone");
+    }).populate("owner", "fullName email phone isVerified");
 
     res.status(200).json({
       success: true,
@@ -325,7 +325,7 @@ const getMyProperties = async (req, res) => {
   // Admin: Get all properties (including inactive)
   const getAllPropertiesAdmin = async (req, res) => {
     try {
-      const properties = await Property.find({}).populate("owner", "fullName email phone");
+      const properties = await Property.find({}).populate("owner", "fullName email phone isVerified");
       res.status(200).json({ success: true, count: properties.length, properties });
     } catch (error) {
       res.status(500).json({ success: false, message: error.message });

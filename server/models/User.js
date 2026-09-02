@@ -48,7 +48,25 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
 
+    // Payment accounts a landlord exposes to tenants (telebirr, bank, etc.)
+    paymentMethods: [
+      {
+        type: {
+          type: String,
+          enum: ["telebirr", "cbebirr", "bank_transfer", "cash", "other"],
+          default: "telebirr",
+        },
+        label: { type: String, default: "" },
+        accountName: { type: String, default: "" },
+        accountNumber: { type: String, default: "" },
+      },
+    ],
+
     isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    isSuspended: {
       type: Boolean,
       default: false,
     },

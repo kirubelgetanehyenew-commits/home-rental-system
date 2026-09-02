@@ -15,7 +15,7 @@ function getInitialTheme() {
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(getInitialTheme);
 
-  // Apply the "dark" class on <html> so Tailwind's dark: variant works
+  // Apply the "dark" class on <html> so the stylesheet's dark theme tokens apply
   useEffect(() => {
     const root = document.documentElement;
 

@@ -35,36 +35,36 @@ export default function Favorites() {
 
   if (loading) {
     return (
-      <div className="text-center mt-20 text-xl">{t("common.loading")}</div>
+      <div className="page page--plain">
+        <div className="container">
+          <div className="loading">{t("common.loading")}</div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto py-10 px-6">
+    <div className="page page--plain">
+      <div className="container container--wide">
+        <h1 className="page-title page-title--lg">{t("favorites.title")}</h1>
 
-      <h1 className="text-4xl font-bold mb-8">{t("favorites.title")}</h1>
-
-      {favorites.length === 0 ? (
-        <div className="rounded-lg bg-white shadow p-8 text-center dark:bg-zinc-900">
-          <p className="text-stone-600 dark:text-zinc-400">
-            {t("favorites.empty")}
-          </p>
-        </div>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-3">
-          {favorites
-            .filter((fav) => fav.property)
-            .map((fav) => (
-              <PropertyCard
-                key={fav._id}
-                property={fav.property}
-                favorited
-                onToggleFavorite={handleToggleFavorite}
-              />
-            ))}
-        </div>
-      )}
-
+        {favorites.length === 0 ? (
+          <div className="empty">{t("favorites.empty")}</div>
+        ) : (
+          <div className="grid grid--cards">
+            {favorites
+              .filter((fav) => fav.property)
+              .map((fav) => (
+                <PropertyCard
+                  key={fav._id}
+                  property={fav.property}
+                  favorited
+                  onToggleFavorite={handleToggleFavorite}
+                />
+              ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

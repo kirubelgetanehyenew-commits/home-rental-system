@@ -5,10 +5,10 @@ import { useLang } from "../context/LanguageContext";
 import API from "../services/api";
 
 const statusStyles = {
-  pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-500/15 dark:text-yellow-300",
-  approved: "bg-green-100 text-green-800 dark:bg-green-500/15 dark:text-green-300",
-  rejected: "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300",
-  cancelled: "bg-stone-200 text-stone-700 dark:bg-zinc-800 dark:text-zinc-300",
+  pending: "badge badge--pending",
+  approved: "badge badge--approved",
+  rejected: "badge badge--rejected",
+  cancelled: "badge badge--cancelled",
 };
 
 function formatDate(date) {
@@ -27,6 +27,14 @@ export default function Bookings() {
   const [myBookings, setMyBookings] = useState([]);
   const [receivedBookings, setReceivedBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Payment modal
+  const [payBooking, setPayBooking] = useState(null);
+  const [payMethod, setPayMethod] = useState("");
+  const [payMessage, setPayMessage] = useState("");
+  const [landlordMethods, setLandlordMethods] = useState([]);
+  const [payShot, setPayShot] = useState(null);
+  const [payShotPreview, setPayShotPreview] = useState("");
 
   const loadBookings = async () => {
     try {
@@ -64,190 +72,316 @@ export default function Bookings() {
     }
   };
 
+  const openPay = async (booking) => {
+    setPayBooking(booking);
+    setPayMessage("");
+    setPayShot(null);
+    setPayShotPreview("");
+    setPayMethod("");
+    setLandlordMethods([]);
+    try {
+      const res = await API.get(
+        `/payments/landlord-methods/${booking.property?.owner?._id}`
+      );
+      const methods = res.data.paymentMethods || [];
+      setLandlordMethods(methods);
+      if (methods.length > 0) setPayMethod(methods[0].type);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const closePay = () => {
+    setPayBooking(null);
+    setPayMessage("");
+    setPayShot(null);
+    setPayShotPreview("");
+  };
+
+  const handlePay = async () => {
+    setPayMessage("");
+    if (!payShot) {
+      setPayMessage(`❌ ${t("payments.needShot")}`);
+      return;
+    }
+    const form = new FormData();
+    form.append("bookingId", payBooking._id);
+    form.append("method", payMethod);
+    form.append("screenshot", payShot);
+    try {
+      await API.post("/payments", form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setPayMessage("✅ " + t("payments.submitted"));
+      setTimeout(closePay, 1600);
+    } catch (err) {
+      setPayMessage(`❌ ${err.response?.data?.message || "Payment failed."}`);
+    }
+  };
+
   if (loading) {
     return (
-      <div className="text-center mt-20 text-xl">{t("common.loading")}</div>
+      <div className="page page--plain">
+        <div className="container">
+          <div className="loading">{t("common.loading")}</div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <div className="max-w-5xl mx-auto py-10 px-6">
+    <div className="page page--plain">
+      <div className="container">
+        <h1 className="page-title page-title--lg">{t("bookings.title")}</h1>
 
-      <h1 className="text-4xl font-bold mb-8">{t("bookings.title")}</h1>
-
-      <div className="flex gap-3 mb-8 flex-wrap">
-        <button
-          onClick={() => setActiveTab("my")}
-          className={`px-5 py-2 rounded-full font-semibold transition ${
-            activeTab === "my"
-              ? "bg-orange-500 text-white"
-              : "bg-stone-200 text-stone-700 hover:bg-stone-300 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
-          }`}
-        >
-          {t("bookings.myRequests")} ({myBookings.length})
-        </button>
-
-        {user?.role !== "tenant" && (
+        <div className="tabs">
           <button
-            onClick={() => setActiveTab("received")}
-            className={`px-5 py-2 rounded-full font-semibold transition ${
-              activeTab === "received"
-                ? "bg-orange-500 text-white"
-                : "bg-stone-200 text-stone-700 hover:bg-stone-300 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
-            }`}
+            onClick={() => setActiveTab("my")}
+            className={`tab${activeTab === "my" ? " tab--active" : ""}`}
           >
-            {t("bookings.receivedRequests")} ({receivedBookings.length})
+            {t("bookings.myRequests")} ({myBookings.length})
           </button>
-        )}
-      </div>
 
-      {/* ============ My Requests ============ */}
-      {activeTab === "my" && (
-        <div className="space-y-4">
-          {myBookings.length === 0 ? (
-            <div className="rounded-lg bg-white shadow p-8 text-center dark:bg-zinc-900">
-              <p className="text-stone-600 dark:text-zinc-400">
+          {user?.role !== "tenant" && (
+            <button
+              onClick={() => setActiveTab("received")}
+              className={`tab${activeTab === "received" ? " tab--active" : ""}`}
+            >
+              {t("bookings.receivedRequests")} ({receivedBookings.length})
+            </button>
+          )}
+        </div>
+
+        {/* ============ My Requests ============ */}
+        {activeTab === "my" && (
+          <div className="stack">
+            {myBookings.length === 0 ? (
+              <div className="empty">
                 {t("bookings.none")}{" "}
-                <Link
-                  to="/properties"
-                  className="text-orange-600 hover:underline dark:text-orange-400"
-                >
+                <Link to="/properties" className="link">
                   {t("bookings.browse")}
                 </Link>
-              </p>
-            </div>
-          ) : (
-            myBookings.map((booking) => (
-              <div
-                key={booking._id}
-                className="bg-white shadow rounded-lg p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 dark:bg-zinc-900 dark:shadow-black/30"
-              >
-                <div>
-                  <Link
-                    to={`/property/${booking.property?._id}`}
-                    className="text-xl font-bold hover:text-orange-600 dark:hover:text-orange-400"
-                  >
-                    {booking.property?.title || t("bookings.propertyRemoved")}
-                  </Link>
-
-                  <p className="text-stone-600 mt-1 dark:text-zinc-400">
-                    📅 {formatDate(booking.date)}
-                    {booking.time ? ` at ${booking.time}` : ""}
-                  </p>
-
-                  {booking.message && (
-                    <p className="text-stone-500 mt-1 text-sm dark:text-zinc-500">
-                      "{booking.message}"
-                    </p>
-                  )}
-
-                  {booking.property?.owner && (
-                    <p className="text-stone-500 mt-1 text-sm dark:text-zinc-500">
-                      {t("bookings.owner")}: {booking.property.owner.fullName}
-                      {booking.property.owner.phone &&
-                        ` · ${booking.property.owner.phone}`}
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                      statusStyles[booking.status]
-                    }`}
-                  >
-                    {t(`status.${booking.status}`)}
-                  </span>
-
-                  {["pending", "approved"].includes(booking.status) && (
-                    <button
-                      onClick={() => updateStatus(booking._id, "cancelled")}
-                      className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+              </div>
+            ) : (
+              myBookings.map((booking) => (
+                <div key={booking._id} className="list-row">
+                  <div>
+                    <Link
+                      to={`/property/${booking.property?._id}`}
+                      className="list-row__title"
                     >
-                      {t("bookings.cancel")}
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      )}
+                      {booking.property?.title || t("bookings.propertyRemoved")}
+                    </Link>
 
-      {/* ============ Received Requests (landlord) ============ */}
-      {activeTab === "received" && (
-        <div className="space-y-4">
-          {receivedBookings.length === 0 ? (
-            <div className="rounded-lg bg-white shadow p-8 text-center dark:bg-zinc-900">
-              <p className="text-stone-600 dark:text-zinc-400">
-                {t("bookings.noneReceived")}
-              </p>
-            </div>
-          ) : (
-            receivedBookings.map((booking) => (
-              <div
-                key={booking._id}
-                className="bg-white shadow rounded-lg p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 dark:bg-zinc-900 dark:shadow-black/30"
-              >
-                <div>
-                  <Link
-                    to={`/property/${booking.property?._id}`}
-                    className="text-xl font-bold hover:text-orange-600 dark:hover:text-orange-400"
-                  >
-                    {booking.property?.title || t("bookings.propertyRemoved")}
-                  </Link>
-
-                  <p className="text-stone-600 mt-1 dark:text-zinc-400">
-                    📅 {formatDate(booking.date)}
-                    {booking.time ? ` at ${booking.time}` : ""}
-                  </p>
-
-                  <p className="text-stone-500 mt-1 text-sm dark:text-zinc-500">
-                    {t("bookings.requestedBy")}: {booking.tenant?.fullName}
-                    {booking.tenant?.phone && ` · ${booking.tenant.phone}`}
-                    {booking.tenant?.email && ` · ${booking.tenant.email}`}
-                  </p>
-
-                  {booking.message && (
-                    <p className="text-stone-500 mt-1 text-sm dark:text-zinc-500">
-                      "{booking.message}"
+                    <p className="list-row__meta">
+                      📅 {formatDate(booking.date)}
+                      {booking.time ? ` at ${booking.time}` : ""}
                     </p>
-                  )}
-                </div>
 
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                      statusStyles[booking.status]
-                    }`}
-                  >
-                    {t(`status.${booking.status}`)}
-                  </span>
+                    {booking.message && (
+                      <p className="list-row__meta">"{booking.message}"</p>
+                    )}
 
-                  {booking.status === "pending" && (
-                    <>
+                    {booking.property?.owner && (
+                      <p className="list-row__meta">
+                        {t("bookings.owner")}: {booking.property.owner.fullName}
+                        {booking.property.owner.phone &&
+                          ` · ${booking.property.owner.phone}`}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="list-row__actions">
+                    <span className={statusStyles[booking.status]}>
+                      {t(`status.${booking.status}`)}
+                    </span>
+
+                    {["pending", "approved"].includes(booking.status) && (
                       <button
-                        onClick={() => updateStatus(booking._id, "approved")}
-                        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                        onClick={() => updateStatus(booking._id, "cancelled")}
+                        className="btn btn--danger btn--sm"
                       >
-                        {t("bookings.approve")}
+                        {t("bookings.cancel")}
                       </button>
+                    )}
 
+                    {booking.status === "approved" && (
                       <button
-                        onClick={() => updateStatus(booking._id, "rejected")}
-                        className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                        onClick={() => openPay(booking)}
+                        className="btn btn--primary btn--sm"
                       >
-                        {t("bookings.reject")}
+                        💳 {t("payments.payNow")}
                       </button>
-                    </>
-                  )}
+                    )}
+
+                    {booking.status === "approved" && (
+                      <Link
+                        to={`/agreement/${booking._id}`}
+                        className="btn btn--outline btn--sm"
+                      >
+                        📄 {t("agreement.view")}
+                      </Link>
+                    )}
+                  </div>
                 </div>
+              ))
+            )}
+          </div>
+        )}
+
+        {/* ============ Received Requests (landlord) ============ */}
+        {activeTab === "received" && (
+          <div className="stack">
+            {receivedBookings.length === 0 ? (
+              <div className="empty">{t("bookings.noneReceived")}</div>
+            ) : (
+              receivedBookings.map((booking) => (
+                <div key={booking._id} className="list-row">
+                  <div>
+                    <Link
+                      to={`/property/${booking.property?._id}`}
+                      className="list-row__title"
+                    >
+                      {booking.property?.title || t("bookings.propertyRemoved")}
+                    </Link>
+
+                    <p className="list-row__meta">
+                      📅 {formatDate(booking.date)}
+                      {booking.time ? ` at ${booking.time}` : ""}
+                    </p>
+
+                    <p className="list-row__meta">
+                      {t("bookings.requestedBy")}: {booking.tenant?.fullName}
+                      {booking.tenant?.phone && ` · ${booking.tenant.phone}`}
+                      {booking.tenant?.email && ` · ${booking.tenant.email}`}
+                    </p>
+
+                    {booking.message && (
+                      <p className="list-row__meta">"{booking.message}"</p>
+                    )}
+                  </div>
+
+                  <div className="list-row__actions">
+                    <span className={statusStyles[booking.status]}>
+                      {t(`status.${booking.status}`)}
+                    </span>
+
+                    {booking.status === "pending" && (
+                      <>
+                        <button
+                          onClick={() => updateStatus(booking._id, "approved")}
+                          className="btn btn--success btn--sm"
+                        >
+                          {t("bookings.approve")}
+                        </button>
+
+                        <button
+                          onClick={() => updateStatus(booking._id, "rejected")}
+                          className="btn btn--danger btn--sm"
+                        >
+                          {t("bookings.reject")}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
+        {/* ============ Payment Modal ============ */}
+        {payBooking && (
+          <div className="modal-overlay">
+            <div className="modal">
+              <h2 className="modal__title">{t("payments.title")}</h2>
+
+              <p className="soft">{payBooking.property?.title}</p>
+              <p className="details-price" style={{ marginTop: 6, marginBottom: 16 }}>
+                ETB {payBooking.property?.price}
+              </p>
+
+              <label className="label" style={{ marginBottom: 8, display: "block" }}>
+                {t("payments.method")}
+              </label>
+
+              {landlordMethods.length === 0 ? (
+                <p className="soft" style={{ marginBottom: 16 }}>
+                  {t("payments.noMethods")}
+                </p>
+              ) : (
+                <div className="pay-methods" style={{ marginBottom: 16 }}>
+                  {landlordMethods.map((m, i) => (
+                    <label
+                      key={i}
+                      className={`pay-method${
+                        payMethod === m.type ? " pay-method--active" : ""
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="payMethod"
+                        value={m.type}
+                        checked={payMethod === m.type}
+                        onChange={() => setPayMethod(m.type)}
+                      />
+                      <span className="pay-method__name">
+                        {m.label || m.type}
+                      </span>
+                      {m.accountName && (
+                        <span className="pay-method__meta">{m.accountName}</span>
+                      )}
+                      {m.accountNumber && (
+                        <span className="pay-method__meta">
+                          {m.accountNumber}
+                        </span>
+                      )}
+                    </label>
+                  ))}
+                </div>
+              )}
+
+              <label className="label" style={{ marginBottom: 8, display: "block" }}>
+                {t("payments.uploadShot")}
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const f = e.target.files[0];
+                  setPayShot(f || null);
+                  setPayShotPreview(f ? URL.createObjectURL(f) : "");
+                }}
+                className="input"
+                style={{ marginBottom: 12 }}
+              />
+              {payShotPreview && (
+                <img
+                  src={payShotPreview}
+                  alt="payment proof"
+                  className="pay-shot-preview"
+                  style={{ marginBottom: 12 }}
+                />
+              )}
+
+              {payMessage && <p style={{ marginBottom: 12 }}>{payMessage}</p>}
+
+              <div className="modal__actions">
+                <button
+                  onClick={handlePay}
+                  disabled={landlordMethods.length === 0}
+                  className="btn btn--primary"
+                >
+                  {t("payments.submitProof")}
+                </button>
+                <button onClick={closePay} className="btn btn--outline">
+                  {t("payments.cancel")}
+                </button>
               </div>
-            ))
-          )}
-        </div>
-      )}
-
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -54,64 +54,57 @@ export default function MyProperties() {
       });
 
       fetchMyProperties();
-
     } catch (err) {
       console.log(err);
     }
   }
 
   return (
-    <div className="max-w-7xl mx-auto py-10 px-6">
-
-      <h1 className="text-4xl font-bold mb-8">
-        {t("my.title")}
-      </h1>
-
-      {properties.length === 0 ? (
-        <p className="text-stone-600 dark:text-zinc-400">{t("my.empty")}</p>
-      ) : (
-        <div className="grid md:grid-cols-3 gap-6">
-
-          {properties.map((property) => (
-            <div
-              key={property._id}
-              className="bg-white rounded-lg shadow p-5 dark:bg-zinc-900 dark:shadow-black/30"
-            >
-              <h2 className="text-xl font-bold">
-                {property.title}
-              </h2>
-
-              <p className="text-stone-500 dark:text-zinc-400">
-                {property.location}
-              </p>
-
-              <p className="font-bold text-orange-600 mt-2 dark:text-orange-400">
-                ETB {property.price}
-              </p>
-
-              <div className="flex gap-3 mt-5">
-
-                <Link
-                  to={`/edit-property/${property._id}`}
-                  className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
-                >
-                  {t("properties.edit")}
-                </Link>
-
-                <button
-                  onClick={() => handleDelete(property._id)}
-                  className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-                >
-                  {t("properties.delete")}
-                </button>
-
-              </div>
-            </div>
-          ))}
-
+    <div className="page page--properties">
+      <div className="container container--wide">
+        <div className="page-header">
+          <h1 className="page-title page-title--lg">{t("my.title")}</h1>
+          <Link to="/add-property" className="btn btn--primary">
+            + {t("nav.addProperty")}
+          </Link>
         </div>
-      )}
 
+        {properties.length === 0 ? (
+          <div className="empty">{t("my.empty")}</div>
+        ) : (
+          <div className="grid grid--cards">
+            {properties.map((property) => (
+              <div key={property._id} className="property-card">
+                <div className="property-card__body">
+                  <h2 className="property-card__title">{property.title}</h2>
+
+                  <p className="property-card__location">
+                    📍 {property.location}
+                  </p>
+
+                  <p className="property-card__price">ETB {property.price}</p>
+
+                  <div className="row row--wrap property-card__meta">
+                    <Link
+                      to={`/edit-property/${property._id}`}
+                      className="btn btn--outline btn--sm"
+                    >
+                      {t("properties.edit")}
+                    </Link>
+
+                    <button
+                      onClick={() => handleDelete(property._id)}
+                      className="btn btn--danger btn--sm"
+                    >
+                      {t("properties.delete")}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
