@@ -78,7 +78,7 @@ export default function AddProperty() {
       setMessage("✅ " + t("add.success"));
 
       setTimeout(() => {
-        navigate("/properties");
+        navigate("/my-properties");
       }, 1200);
     } catch (err) {
       setMessage(

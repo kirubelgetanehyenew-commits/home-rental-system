@@ -241,13 +241,13 @@ export default function Dashboard() {
                 <h3 className="section__title">{t("dash.adminOverview")}</h3>
 
                 <div className="grid grid--3" style={{ marginBottom: 24 }}>
-                  <Link to="/admin/users" className="admin-link">
+                  <Link to="/admin?tab=users" className="admin-link">
                     👥 {t("admin.users")}
                   </Link>
-                  <Link to="/admin/properties" className="admin-link">
+                  <Link to="/admin?tab=properties" className="admin-link">
                     🏠 {t("admin.properties")}
                   </Link>
-                  <Link to="/admin/reports" className="admin-link">
+                  <Link to="/admin?tab=reports" className="admin-link">
                     🚩 {t("admin.reports")}
                   </Link>
                 </div>
@@ -330,7 +330,7 @@ export default function Dashboard() {
 
                 <h3 className="section__title">{t("dash.quickActions")}</h3>
                 <div className="grid grid--3">
-                  <Link to="/properties" className="admin-link">
+                  <Link to="/" className="admin-link">
                     🔎 {t("nav.properties")}
                   </Link>
                   <Link to="/favorites" className="admin-link">
@@ -365,7 +365,7 @@ export default function Dashboard() {
                   <div className="card" style={{ marginBottom: 32 }}>
                     <p className="empty">{t("dash.noRequests")}</p>
                     <Link
-                      to="/properties"
+                      to="/"
                       className="btn btn--primary"
                       style={{ marginTop: 12 }}
                     >
@@ -413,7 +413,7 @@ export default function Dashboard() {
                   <h3 className="section__title" style={{ margin: 0 }}>
                     {t("dash.recommended")}
                   </h3>
-                  <Link to="/properties" className="link">
+                  <Link to="/" className="link">
                     {t("home.browse")} →
                   </Link>
                 </div>

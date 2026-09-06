@@ -28,8 +28,10 @@ export default function Messages() {
     load();
   }, []);
 
-  // Group by property + other user
+  // Group by property + other user (skip orphaned messages whose
+  // sender/recipient/property was deleted, which populate returns as null)
   const grouped = conversations.reduce((acc, msg) => {
+    if (!msg.sender || !msg.recipient || !msg.property) return acc;
     const other = msg.sender._id === userId ? msg.recipient : msg.sender;
     const key = `${msg.property._id}-${other._id}`;
     if (!acc[key]) {
@@ -152,20 +154,24 @@ export default function Messages() {
             </div>
 
             <div className="chat__messages">
-              {messages.map((msg) => (
-                <div
-                  key={msg._id}
-                  className={`bubble${msg.sender._id === userId ? " bubble--mine" : ""}`}
-                >
-                  <p>
-                    <span className="bubble__author">{msg.sender.fullName}</span>{" "}
-                    {msg.content}
-                  </p>
-                  <p className="bubble__time">
-                    {new Date(msg.createdAt).toLocaleString()}
-                  </p>
-                </div>
-              ))}
+              {messages
+                .filter((msg) => msg.sender)
+                .map((msg) => (
+                  <div
+                    key={msg._id}
+                    className={`bubble${msg.sender._id === userId ? " bubble--mine" : ""}`}
+                  >
+                    <p>
+                      <span className="bubble__author">
+                        {msg.sender.fullName}
+                      </span>{" "}
+                      {msg.content}
+                    </p>
+                    <p className="bubble__time">
+                      {new Date(msg.createdAt).toLocaleString()}
+                    </p>
+                  </div>
+                ))}
             </div>
 
             <div className="chat__input">

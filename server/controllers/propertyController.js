@@ -1,4 +1,6 @@
 const Property = require("../models/Property");
+const Message = require("../models/Message");
+const Booking = require("../models/Booking");
 
 // Create Property
 const createProperty = async (req, res) => {
@@ -290,6 +292,12 @@ const deleteProperty = async (req, res) => {
     }
 
     await property.deleteOne();
+
+    // Remove orphaned messages/bookings that referenced this property
+    await Promise.all([
+      Message.deleteMany({ property: property._id }),
+      Booking.deleteMany({ property: property._id }),
+    ]);
 
     res.status(200).json({
       success: true,

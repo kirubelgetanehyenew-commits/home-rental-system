@@ -158,7 +158,7 @@ export default function Bookings() {
             {myBookings.length === 0 ? (
               <div className="empty">
                 {t("bookings.none")}{" "}
-                <Link to="/properties" className="link">
+                <Link to="/" className="link">
                   {t("bookings.browse")}
                 </Link>
               </div>

@@ -21,9 +21,7 @@ import Bookings from "./pages/Bookings";
 import Payments from "./pages/Payments";
 import Messages from "./pages/Messages";
 import Agreement from "./pages/Agreement";
-import AdminUsers from "./pages/AdminUsers";
-import AdminProperties from "./pages/AdminProperties";
-import AdminReports from "./pages/AdminReports";
+import Admin from "./pages/Admin";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import VerifyEmail from "./pages/VerifyEmail";
@@ -43,7 +41,14 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/properties" element={<Properties />} />
+            <Route
+              path="/properties"
+              element={
+                <ProtectedRoute>
+                  <Properties />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/property/:id" element={<PropertyDetails />} />
             <Route
               path="/dashboard"
@@ -51,14 +56,6 @@ function App() {
                 <ProtectedRoute>
                   <Dashboard />
                 </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <AdminRoute>
-                  <Dashboard />
-                </AdminRoute>
               }
             />
             <Route
@@ -134,26 +131,10 @@ function App() {
               }
             />
             <Route
-              path="/admin/users"
+              path="/admin"
               element={
                 <AdminRoute>
-                  <AdminUsers />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="/admin/properties"
-              element={
-                <AdminRoute>
-                  <AdminProperties />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="/admin/reports"
-              element={
-                <AdminRoute>
-                  <AdminReports />
+                  <Admin />
                 </AdminRoute>
               }
             />

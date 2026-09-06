@@ -30,13 +30,18 @@ const registerUser = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Self-registration may only create tenant/landlord accounts.
+    // "admin" (or any other value) is never honored from the request body —
+    // admin accounts must be assigned separately (e.g. via DB or seed script).
+    const safeRole = role === "landlord" ? "landlord" : "tenant";
+
     // Create user
     const user = await User.create({
       fullName,
       email,
       password: hashedPassword,
       phone,
-      role,
+      role: safeRole,
     });
 
     // Generate token

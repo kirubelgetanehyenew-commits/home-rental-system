@@ -26,7 +26,6 @@ export default function Footer() {
           <h4 className="footer__title">{t("footer.quickLinks")}</h4>
           <nav className="footer__links">
             <Link to="/">{t("nav.home")}</Link>
-            <Link to="/properties">{t("nav.properties")}</Link>
             {user ? (
               <Link to="/dashboard">{t("nav.dashboard")}</Link>
             ) : (
@@ -44,8 +43,8 @@ export default function Footer() {
         <div className="footer__col">
           <h4 className="footer__title">{t("footer.contact")}</h4>
           <ul className="footer__contact">
-            <li>✉️ info@homerental.et</li>
-            <li>📞 +251 911 234 567</li>
+            <li>✉️ kirubegetanehyenew@gmail.com</li>
+            <li>📞 +251 903431211</li>
             <li>📍 Addis Ababa, Ethiopia</li>
           </ul>
         </div>

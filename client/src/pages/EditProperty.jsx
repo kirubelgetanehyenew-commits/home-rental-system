@@ -32,6 +32,10 @@ export default function EditProperty() {
     propertyType: "Apartment",
   });
 
+  const [images, setImages] = useState([]); // existing image URLs on the property
+  const [newImages, setNewImages] = useState([]); // newly picked files
+  const [newPreviews, setNewPreviews] = useState([]);
+
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -48,6 +52,7 @@ export default function EditProperty() {
           area: res.data.property.area,
           propertyType: res.data.property.propertyType,
         });
+        setImages(res.data.property.images || []);
       } catch (err) {
         console.error(err);
       }
@@ -55,6 +60,34 @@ export default function EditProperty() {
 
     loadProperty();
   }, [id]);
+
+  function handleImageChange(e) {
+    const files = Array.from(e.target.files).slice(0, 5);
+    setNewImages(files);
+    setNewPreviews(files.map((file) => URL.createObjectURL(file)));
+  }
+
+  function removeImage(index) {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function removeNewImage(index) {
+    setNewImages((prev) => prev.filter((_, i) => i !== index));
+    setNewPreviews((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  async function uploadNewImages() {
+    if (newImages.length === 0) return [];
+
+    const fd = new FormData();
+    newImages.forEach((image) => fd.append("images", image));
+
+    const res = await API.post("/properties/upload", fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    return res.data.images;
+  }
 
   function handleChange(e) {
     setFormData({
@@ -67,12 +100,19 @@ export default function EditProperty() {
     e.preventDefault();
 
     try {
-      await API.put(`/properties/${id}`, formData);
+      setMessage(t("add.uploading"));
+      const uploaded = await uploadNewImages();
+
+      setMessage(t("add.saving"));
+      await API.put(`/properties/${id}`, {
+        ...formData,
+        images: [...images, ...uploaded],
+      });
 
       setMessage("✅ " + t("edit.success"));
 
       setTimeout(() => {
-        navigate("/properties");
+        navigate("/my-properties");
       }, 1000);
     } catch (err) {
       setMessage(
@@ -171,6 +211,62 @@ export default function EditProperty() {
                 </option>
               ))}
             </select>
+
+            <div className="form-group">
+              <label className="label">{t("add.photos")}</label>
+
+              {images.length > 0 && (
+                <div className="row row--wrap" style={{ marginBottom: 12 }}>
+                  {images.map((src, index) => (
+                    <div key={index} className="thumb-wrap">
+                      <img
+                        src={src}
+                        alt={`Property ${index + 1}`}
+                        className="thumb"
+                      />
+                      <button
+                        type="button"
+                        className="thumb-remove"
+                        onClick={() => removeImage(index)}
+                        title={t("edit.removePhoto")}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageChange}
+                className="input"
+              />
+
+              {newPreviews.length > 0 && (
+                <div className="row row--wrap" style={{ marginTop: 12 }}>
+                  {newPreviews.map((src, index) => (
+                    <div key={index} className="thumb-wrap">
+                      <img
+                        src={src}
+                        alt={`New preview ${index + 1}`}
+                        className="thumb"
+                      />
+                      <button
+                        type="button"
+                        className="thumb-remove"
+                        onClick={() => removeNewImage(index)}
+                        title={t("edit.removePhoto")}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <button className="btn btn--primary btn--lg btn--block">
               {t("edit.button")}
