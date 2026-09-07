@@ -22,6 +22,9 @@ const translations = {
     "footer.quickLinks": "Quick Links",
     "footer.contact": "Contact",
     "footer.rights": "All rights reserved.",
+    "footer.explore": "Explore",
+    "footer.account": "Your Account",
+    "footer.top": "Back to top",
     "common.loading": "Loading...",
 
     // Home
@@ -430,6 +433,9 @@ const translations = {
     "footer.quickLinks": "ፈጣን አገናኞች",
     "footer.contact": "ያግኙን",
     "footer.rights": "መብቱ በህግ የተጠበቀ ነው።",
+    "footer.explore": "አስሱ",
+    "footer.account": "የእርስዎ መለያ",
+    "footer.top": "ወደ ላይ መለስ",
     "common.loading": "በመጫን ላይ...",
 
     // Home

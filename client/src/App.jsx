@@ -1,9 +1,11 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
 import { LanguageProvider } from "./context/LanguageContext";
+import { useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 import Sidebar from "./components/Sidebar";
+import PublicNavbar from "./components/PublicNavbar";
 import TopActions from "./components/TopActions";
 import Footer from "./components/Footer";
 import EditProperty from "./pages/EditProperty";
@@ -27,13 +29,21 @@ import ResetPassword from "./pages/ResetPassword";
 import VerifyEmail from "./pages/VerifyEmail";
 
 function App() {
+  const { user } = useAuth();
+
   return (
     <ThemeProvider>
       <LanguageProvider>
         <BrowserRouter>
-      <div className="app-shell">
-        <Sidebar />
-        <TopActions />
+      <div className={`app-shell${user ? "" : " app-shell--guest"}`}>
+        {user ? (
+          <>
+            <Sidebar />
+            <TopActions />
+          </>
+        ) : (
+          <PublicNavbar />
+        )}
 
         <div className="app-body">
         <main className="app-main">

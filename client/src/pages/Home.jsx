@@ -81,6 +81,24 @@ export default function Home() {
     loadProperties();
   }, [filters, page]);
 
+  // Reveal sections as they scroll into view
+  useEffect(() => {
+    const els = document.querySelectorAll(".reveal");
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((en) => {
+          if (en.isIntersecting) {
+            en.target.classList.add("reveal--in");
+            io.unobserve(en.target);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+
   function handleChange(e) {
     setFilters({ ...filters, [e.target.name]: e.target.value });
     setPage(1);
@@ -89,6 +107,7 @@ export default function Home() {
   function handleSearch(e) {
     e.preventDefault();
     setPage(1);
+    document.getElementById("listings")?.scrollIntoView({ behavior: "smooth" });
   }
 
   function handleReset() {
@@ -132,10 +151,10 @@ export default function Home() {
   };
 
   const stats = [
-    { value: "500+", label: t("home.stats.properties") },
-    { value: "1,200+", label: t("home.stats.tenants") },
-    { value: "12", label: t("home.stats.cities") },
-    { value: "300+", label: t("home.stats.landlords") },
+    { value: "500+", label: t("home.stats.properties"), icon: "🏠" },
+    { value: "1,200+", label: t("home.stats.tenants"), icon: "😊" },
+    { value: "12", label: t("home.stats.cities"), icon: "📍" },
+    { value: "300+", label: t("home.stats.landlords"), icon: "🤝" },
   ];
 
   const steps = [
@@ -149,9 +168,59 @@ export default function Home() {
       <div className="container container--wide">
         {/* ---------- Hero ---------- */}
         <section className="hero">
+          <div className="hero__glow hero__glow--1" aria-hidden="true" />
+          <div className="hero__glow hero__glow--2" aria-hidden="true" />
+
           <span className="hero__eyebrow">{t("home.tagline")}</span>
           <h1 className="hero__title">{t("home.title")}</h1>
           <p className="hero__subtitle">{t("home.subtitle")}</p>
+
+          <form onSubmit={handleSearch} className="hero__search">
+            <input
+              name="keyword"
+              placeholder={t("properties.searchPlaceholder")}
+              value={filters.keyword}
+              onChange={handleChange}
+              className="hero__search-input"
+            />
+            <select
+              name="propertyType"
+              value={filters.propertyType}
+              onChange={handleChange}
+              className="hero__search-select"
+            >
+              <option value="">{t("properties.allTypes")}</option>
+              {PROPERTY_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {t(`type.${type}`)}
+                </option>
+              ))}
+            </select>
+            <button className="btn btn--primary btn--lg">
+              {t("properties.search")}
+            </button>
+          </form>
+
+          <div className="hero__types">
+            {PROPERTY_TYPES.map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => {
+                  setFilters({ ...filters, propertyType: type });
+                  setPage(1);
+                  document
+                    .getElementById("listings")
+                    ?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className={`type-chip${
+                  filters.propertyType === type ? " type-chip--active" : ""
+                }`}
+              >
+                {t(`type.${type}`)}
+              </button>
+            ))}
+          </div>
 
           <div className="hero__actions">
             <a href="#listings" className="btn btn--primary btn--lg">
@@ -167,7 +236,7 @@ export default function Home() {
         </section>
 
         {/* ---------- Listings: search, filters, grid ---------- */}
-        <section className="section" id="listings">
+        <section className="section reveal" id="listings">
           <h2 className="section__title">{t("properties.title")}</h2>
 
           <form onSubmit={handleSearch} className="card" style={{ marginBottom: 24 }}>
@@ -309,9 +378,10 @@ export default function Home() {
         </section>
 
         {/* ---------- Stats band ---------- */}
-        <section className="stats-band">
+        <section className="stats-band reveal">
           {stats.map((s) => (
             <div className="stats-band__item" key={s.label}>
+              <span className="stats-band__icon">{s.icon}</span>
               <p className="stats-band__value">{s.value}</p>
               <p className="stats-band__label">{s.label}</p>
             </div>
@@ -319,7 +389,7 @@ export default function Home() {
         </section>
 
         {/* ---------- How it works ---------- */}
-        <section className="section">
+        <section className="section reveal">
           <h2 className="section__title center">{t("home.how.title")}</h2>
           <div className="grid grid--3">
             {steps.map((s) => (
@@ -333,7 +403,7 @@ export default function Home() {
         </section>
 
         {/* ---------- Why choose us ---------- */}
-        <section className="section">
+        <section className="section reveal">
           <h2 className="section__title center">{t("home.whyTitle")}</h2>
           <div className="grid grid--3">
             {[
@@ -351,7 +421,7 @@ export default function Home() {
         </section>
 
         {/* ---------- Landlord CTA ---------- */}
-        <section className="cta-band">
+        <section className="cta-band reveal">
           <div>
             <h2 className="cta-band__title">{t("home.cta.title")}</h2>
             <p className="cta-band__desc">{t("home.cta.desc")}</p>
