@@ -29,6 +29,13 @@ const TYPE_ICONS = {
   "Guest House": "🛖",
 };
 
+const PRICE_PERIODS = [
+  { value: "month", icon: "🗓️" },
+  { value: "week", icon: "📆" },
+  { value: "day", icon: "☀️" },
+  { value: "year", icon: "📅" },
+];
+
 export default function AddProperty() {
   const navigate = useNavigate();
   const { t } = useLang();
@@ -37,6 +44,7 @@ export default function AddProperty() {
     title: "",
     description: "",
     price: "",
+    pricePeriod: "month",
     location: "",
     bedrooms: "",
     bathrooms: "",
@@ -188,6 +196,29 @@ export default function AddProperty() {
                     className="input"
                     required
                   />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="label">⏳ {t("add.pricePeriod")}</label>
+                <div className="ptype-grid">
+                  {PRICE_PERIODS.map((period) => (
+                    <button
+                      type="button"
+                      key={period.value}
+                      onClick={() =>
+                        setFormData({ ...formData, pricePeriod: period.value })
+                      }
+                      className={`ptype-option${
+                        formData.pricePeriod === period.value
+                          ? " ptype-option--active"
+                          : ""
+                      }`}
+                    >
+                      <span className="ptype-option__icon">{period.icon}</span>
+                      {t(`period.${period.value}`)}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>

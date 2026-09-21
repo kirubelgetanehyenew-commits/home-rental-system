@@ -3628,3 +3628,199 @@ h4 {
     font-size: 30px;
   }
 }
+
+/* ==========================================================================
+   PAYMENTS — professional transaction console
+   ========================================================================== */
+.pay-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.pay-hero__icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: var(--brand-gradient);
+  font-size: 1.6rem;
+  box-shadow: var(--shadow-sm);
+}
+.pay-hero__title {
+  font-size: 30px;
+  font-weight: 800;
+}
+.pay-hero__sub {
+  color: var(--text-soft);
+  font-size: 0.95rem;
+}
+.pay-section {
+  margin-bottom: 32px;
+}
+.pay-methods-card {
+  padding: 20px;
+  border-radius: 20px;
+}
+.pay-form-msg {
+  margin-top: 12px;
+  font-weight: 600;
+}
+
+.pay-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.pay-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.pay-card--pending {
+  border-left: 5px solid #d97706;
+}
+.pay-card--approved,
+.pay-card--successful {
+  border-left: 5px solid var(--success);
+}
+.pay-card--rejected,
+.pay-card--failed {
+  border-left: 5px solid var(--danger);
+}
+.pay-card--refunded {
+  border-left: 5px solid var(--text-muted);
+}
+.pay-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.pay-card__who {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.pay-card__avatar {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-weight: 800;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.pay-card__name {
+  font-weight: 700;
+}
+.pay-card__sub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pay-card__body {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.pay-card__amount {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--brand);
+}
+.pay-card__amount small {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+.pay-card__chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.pay-card__chip {
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-soft);
+}
+.pay-card__chip--mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.02em;
+}
+.pay-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 20px;
+  border-top: 1px dashed var(--border);
+}
+.pay-proof {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px 6px 6px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-2);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-soft);
+  transition: border-color 0.15s, transform 0.15s;
+}
+.pay-proof:hover {
+  border-color: var(--brand);
+  transform: translateY(-1px);
+}
+.pay-proof img {
+  width: 64px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+.pay-card__actions {
+  display: flex;
+  gap: 8px;
+}
+.pay-card__hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.pay-card__reason {
+  padding: 10px 20px;
+  background: rgba(220, 38, 38, 0.08);
+  color: var(--danger);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-top: 1px solid rgba(220, 38, 38, 0.25);
+}
+
+@media (max-width: 640px) {
+  .pay-card__body,
+  .pay-card__foot {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

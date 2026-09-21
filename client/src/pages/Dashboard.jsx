@@ -470,7 +470,7 @@ export default function Dashboard() {
                             <h4 className="prop-rich__title">{p.title}</h4>
                             <p className="prop-rich__price">
                               {Number(p.price).toLocaleString()}{" "}
-                              <span>ETB {t("details.perMonth")}</span>
+                              <span>ETB {t(`price.${p.pricePeriod || "month"}`)}</span>
                             </p>
                           </div>
 

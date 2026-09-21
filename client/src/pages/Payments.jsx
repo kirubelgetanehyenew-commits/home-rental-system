@@ -14,6 +14,15 @@ const statusStyles = {
 
 const METHOD_TYPES = ["telebirr", "cbebirr", "bank_transfer", "cash", "other"];
 
+const METHOD_ICONS = {
+  telebirr: "📱",
+  cbebirr: "🏦",
+  bank_transfer: "🏦",
+  card: "💳",
+  cash: "💵",
+  other: "🧾",
+};
+
 function methodLabel(m, t) {
   if (m.label) return m.label;
   if (m.type === "bank_transfer") return t("payments.bankTransfer");
@@ -27,6 +36,8 @@ function statusLabel(status, t) {
   return lbl === key ? status : lbl;
 }
 
+const isPaid = (p) => p.status === "approved" || p.status === "successful";
+
 export default function Payments() {
   const { user } = useAuth();
   const { t } = useLang();
@@ -36,8 +47,11 @@ export default function Payments() {
   const [mine, setMine] = useState(null);
   const [methods, setMethods] = useState(null);
   const [methodsMsg, setMethodsMsg] = useState("");
+  const [actionMsg, setActionMsg] = useState("");
   const [viewShot, setViewShot] = useState(null);
   const [viewed, setViewed] = useState({});
+  const [rejecting, setRejecting] = useState(null);
+  const [rejectReason, setRejectReason] = useState("");
 
   const loadReceived = async () => {
     try {
@@ -76,22 +90,29 @@ export default function Payments() {
   }, [isLandlord]);
 
   const approve = async (id) => {
+    setActionMsg("");
     try {
       await API.put(`/payments/${id}/approve`);
+      setActionMsg("✅ " + t("status.approved"));
       await loadReceived();
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to approve.");
+      setActionMsg(`❌ ${err.response?.data?.message || "Failed to approve."}`);
     }
   };
 
-  const reject = async (id) => {
-    const reason = window.prompt(t("payments.rejectReason"), "");
-    if (reason === null) return;
+  const submitReject = async (e) => {
+    e.preventDefault();
+    setActionMsg("");
     try {
-      await API.put(`/payments/${id}/reject`, { reason });
+      await API.put(`/payments/${rejecting._id}/reject`, {
+        reason: rejectReason.trim(),
+      });
+      setRejecting(null);
+      setRejectReason("");
+      setActionMsg("🚫 " + t("status.rejected"));
       await loadReceived();
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to reject.");
+      setActionMsg(`❌ ${err.response?.data?.message || "Failed to reject."}`);
     }
   };
 
@@ -127,27 +148,70 @@ export default function Payments() {
     setViewed((v) => ({ ...v, [p._id]: true }));
   };
 
-  const renderShot = (p) =>
-    p.screenshot ? (
-      <img
-        src={p.screenshot}
-        alt="proof"
-        className="pay-shot-inline"
-        title={t("payments.viewShot")}
-        onClick={() => openShot(p)}
-      />
-    ) : null;
+  const list = isLandlord ? received : mine;
+  const paidTotal = (list || []).filter(isPaid).reduce((s, p) => s + (p.amount || 0), 0);
+  const pendingCount = (list || []).filter((p) => p.status === "pending").length;
+  const rejectedCount = (list || []).filter((p) => p.status === "rejected").length;
 
   return (
     <div className="page page--plain">
       <div className="container">
-        <h1 className="page-title">{t("payments.pageTitle")}</h1>
+        <div className="pay-hero">
+          <span className="pay-hero__icon">💳</span>
+          <div>
+            <h1 className="pay-hero__title">{t("payments.pageTitle")}</h1>
+            <p className="pay-hero__sub">
+              {isLandlord ? t("payments.received") : t("payments.myPayments")}
+            </p>
+          </div>
+        </div>
+
+        {actionMsg && (
+          <div
+            className={`alert ${
+              actionMsg.startsWith("❌") ? "alert--error" : "alert--success"
+            }`}
+            style={{ marginBottom: 20 }}
+          >
+            {actionMsg}
+          </div>
+        )}
+
+        {/* ============ Summary stats ============ */}
+        <div className="grid grid--3" style={{ marginBottom: 28 }}>
+          <div className="stat-card">
+            <span className="stat-card__icon">💵</span>
+            <span className="stat-card__text">
+              <p className="stat-card__value">{paidTotal.toLocaleString()}</p>
+              <p className="stat-card__label">
+                {isLandlord ? t("dash.paymentsReceived") : t("payments.totalPaid")}
+              </p>
+            </span>
+          </div>
+
+          <div className="stat-card">
+            <span className="stat-card__icon">⏳</span>
+            <span className="stat-card__text">
+              <p className="stat-card__value">{pendingCount}</p>
+              <p className="stat-card__label">{t("status.pending")}</p>
+            </span>
+          </div>
+
+          <div className="stat-card">
+            <span className="stat-card__icon">🚫</span>
+            <span className="stat-card__text">
+              <p className="stat-card__value">{rejectedCount}</p>
+              <p className="stat-card__label">{t("status.rejected")}</p>
+            </span>
+          </div>
+        </div>
 
         {/* ============ Landlord: payment methods config ============ */}
         {isLandlord && (
-          <>
-            <h3 className="section__title">{t("payments.myMethods")}</h3>
-            <div className="card" style={{ marginBottom: 32 }}>
+          <section className="pay-section">
+            <h2 className="section__title">🏦 {t("payments.myMethods")}</h2>
+
+            <div className="card pay-methods-card">
               <p className="soft" style={{ marginBottom: 16 }}>
                 {t("payments.methodsHint")}
               </p>
@@ -160,22 +224,18 @@ export default function Payments() {
                     <div className="pay-method-row" key={i}>
                       <select
                         value={m.type}
-                        onChange={(e) =>
-                          updateMethod(i, "type", e.target.value)
-                        }
+                        onChange={(e) => updateMethod(i, "type", e.target.value)}
                         className="select"
                       >
                         {METHOD_TYPES.map((ty) => (
                           <option key={ty} value={ty}>
-                            {ty}
+                            {METHOD_ICONS[ty]} {ty}
                           </option>
                         ))}
                       </select>
                       <input
                         value={m.label}
-                        onChange={(e) =>
-                          updateMethod(i, "label", e.target.value)
-                        }
+                        onChange={(e) => updateMethod(i, "label", e.target.value)}
                         placeholder={t("payments.labelPh")}
                         className="input"
                       />
@@ -199,7 +259,7 @@ export default function Payments() {
                         onClick={() => removeMethod(i)}
                         className="btn btn--danger btn--sm"
                       >
-                        ✕
+                        🗑
                       </button>
                     </div>
                   ))}
@@ -212,106 +272,164 @@ export default function Payments() {
                       💾 {t("payments.saveMethods")}
                     </button>
                   </div>
-                  {methodsMsg && <p style={{ marginTop: 12 }}>{methodsMsg}</p>}
+                  {methodsMsg && (
+                    <p className="pay-form-msg">{methodsMsg}</p>
+                  )}
                 </>
               )}
             </div>
-
-            <h3 className="section__title">{t("payments.received")}</h3>
-            <div className="stack">
-              {received === null ? (
-                <p className="soft">{t("common.loading")}</p>
-              ) : received.length === 0 ? (
-                <div className="empty">{t("payments.noPayments")}</div>
-              ) : (
-                received.map((p) => (
-                  <div key={p._id} className="list-row">
-                    <div>
-                      <span className="list-row__title">
-                        {p.property?.title || "—"}
-                      </span>
-                      <p className="list-row__meta">
-                        👤 {p.tenant?.fullName} · {p.tenant?.email}
-                      </p>
-                      <p className="list-row__meta">
-                        💵 ETB {p.amount} · {methodLabel(p, t)}
-                      </p>
-                      {p.rejectReason && (
-                        <p className="list-row__meta">⚠️ {p.rejectReason}</p>
-                      )}
-                    </div>
-                    <div className="list-row__actions">
-                      {renderShot(p)}
-                      <span className={statusStyles[p.status] || "badge"}>
-                        {statusLabel(p.status, t)}
-                      </span>
-                      {p.status === "pending" && (
-                        <>
-                          <button
-                            onClick={() => approve(p._id)}
-                            disabled={!viewed[p._id]}
-                            title={
-                              !viewed[p._id] ? t("payments.viewFirst") : ""
-                            }
-                            className="btn btn--success btn--sm"
-                          >
-                            {t("payments.approve")}
-                          </button>
-                          <button
-                            onClick={() => reject(p._id)}
-                            className="btn btn--danger btn--sm"
-                          >
-                            {t("payments.reject")}
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </>
+          </section>
         )}
 
-        {/* ============ Tenant: my payments ============ */}
-        {!isLandlord && (
-          <>
-            <h3 className="section__title">{t("payments.myPayments")}</h3>
-            <div className="stack">
-              {mine === null ? (
-                <p className="soft">{t("common.loading")}</p>
-              ) : mine.length === 0 ? (
-                <div className="empty">{t("payments.noPayments")}</div>
-              ) : (
-                mine.map((p) => (
-                  <div key={p._id} className="list-row">
-                    <div>
-                      <span className="list-row__title">
-                        {p.property?.title || "—"}
+        {/* ============ Transactions ============ */}
+        <section className="pay-section">
+          <h2 className="section__title">
+            {isLandlord ? `📥 ${t("payments.received")}` : `🧾 ${t("payments.myPayments")}`}
+          </h2>
+
+          {list === null ? (
+            <p className="soft">{t("common.loading")}</p>
+          ) : list.length === 0 ? (
+            <div className="empty">{t("payments.noPayments")}</div>
+          ) : (
+            <div className="pay-list">
+              {list.map((p) => (
+                <article key={p._id} className={`pay-card pay-card--${p.status}`}>
+                  <header className="pay-card__head">
+                    <div className="pay-card__who">
+                      <span className="pay-card__avatar">
+                        {isLandlord ? p.tenant?.fullName?.[0] || "?" : "💵"}
                       </span>
-                      <p className="list-row__meta">
-                        💵 ETB {p.amount} · {methodLabel(p, t)}
-                      </p>
-                      {p.status === "pending" && (
-                        <p className="list-row__meta">
-                          {t("payments.pendingApproval")}
+                      <div>
+                        <p className="pay-card__name">
+                          {isLandlord
+                            ? p.tenant?.fullName || "—"
+                            : p.property?.title || "—"}
                         </p>
-                      )}
-                      {p.rejectReason && (
-                        <p className="list-row__meta">⚠️ {p.rejectReason}</p>
-                      )}
+                        <p className="pay-card__sub">
+                          {isLandlord
+                            ? p.tenant?.email
+                            : p.property?.location || "—"}
+                        </p>
+                      </div>
                     </div>
-                    <div className="list-row__actions">
-                      {renderShot(p)}
-                      <span className={statusStyles[p.status] || "badge"}>
-                        {statusLabel(p.status, t)}
+
+                    <span className={statusStyles[p.status] || "badge"}>
+                      {statusLabel(p.status, t)}
+                    </span>
+                  </header>
+
+                  <div className="pay-card__body">
+                    <p className="pay-card__amount">
+                      {Number(p.amount).toLocaleString()} <small>ETB</small>
+                    </p>
+
+                    <div className="pay-card__chips">
+                      <span className="pay-card__chip">
+                        {METHOD_ICONS[p.method] || "🧾"} {methodLabel(p, t)}
+                      </span>
+                      <span
+                        className="pay-card__chip pay-card__chip--mono"
+                        title={t("payments.ref")}
+                      >
+                        # {p.transactionRef}
+                      </span>
+                      <span className="pay-card__chip">
+                        🕒 {new Date(p.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
-                ))
-              )}
+
+                  <div className="pay-card__foot">
+                    {p.screenshot ? (
+                      <button
+                        type="button"
+                        className="pay-proof"
+                        onClick={() => openShot(p)}
+                      >
+                        <img src={p.screenshot} alt={t("payments.viewProof")} />
+                        <span>
+                          {viewed[p._id] ? "✅" : "🔒"} {t("payments.viewProof")}
+                        </span>
+                      </button>
+                    ) : (
+                      <span className="pay-card__hint">—</span>
+                    )}
+
+                    {isLandlord && p.status === "pending" && (
+                      <div className="pay-card__actions">
+                        <button
+                          onClick={() => approve(p._id)}
+                          disabled={!viewed[p._id]}
+                          title={!viewed[p._id] ? t("payments.viewFirst") : ""}
+                          className="btn btn--success btn--sm"
+                        >
+                          ✅ {t("payments.approve")}
+                        </button>
+                        <button
+                          onClick={() => {
+                            setRejecting(p);
+                            setRejectReason("");
+                          }}
+                          className="btn btn--danger btn--sm"
+                        >
+                          🚫 {t("payments.reject")}
+                        </button>
+                      </div>
+                    )}
+
+                    {!isLandlord && p.status === "pending" && (
+                      <span className="pay-card__hint">
+                        ⏳ {t("payments.pendingApproval")}
+                      </span>
+                    )}
+                  </div>
+
+                  {p.rejectReason && (
+                    <div className="pay-card__reason">⚠️ {p.rejectReason}</div>
+                  )}
+                </article>
+              ))}
             </div>
-          </>
+          )}
+        </section>
+
+        {/* ============ Reject reason modal ============ */}
+        {rejecting && (
+          <div className="modal-overlay">
+            <form className="modal" onSubmit={submitReject}>
+              <h2 className="modal__title">🚫 {t("payments.rejectTitle")}</h2>
+
+              <p className="soft" style={{ marginBottom: 12 }}>
+                {isLandlord
+                  ? rejecting.tenant?.fullName
+                  : rejecting.property?.title}{" "}
+                · {Number(rejecting.amount).toLocaleString()} ETB
+              </p>
+
+              <textarea
+                rows="3"
+                required
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder={t("payments.rejectPh")}
+                className="textarea"
+              />
+
+              <div className="row" style={{ marginTop: 16 }}>
+                <button
+                  type="button"
+                  onClick={() => setRejecting(null)}
+                  className="btn btn--outline"
+                >
+                  {t("payments.cancel")}
+                </button>
+                <button className="btn btn--danger">
+                  🚫 {t("payments.reject")}
+                </button>
+              </div>
+            </form>
+          </div>
         )}
 
         {/* ============ Screenshot viewer ============ */}

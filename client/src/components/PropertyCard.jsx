@@ -69,7 +69,7 @@ export default function PropertyCard({
 
         <p className="property-card__price">
           {Number(property.price).toLocaleString()}{" "}
-          <small>ETB {t("details.perMonth")}</small>
+          <small>ETB {t(`price.${property.pricePeriod || "month"}`)}</small>
         </p>
 
         <div className="property-card__actions">

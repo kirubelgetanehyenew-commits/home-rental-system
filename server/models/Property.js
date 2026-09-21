@@ -36,6 +36,12 @@ const propertySchema = new mongoose.Schema(
       required: true,
     },
 
+    pricePeriod: {
+      type: String,
+      enum: ["month", "week", "day", "year"],
+      default: "month",
+    },
+
     deposit: {
       type: Number,
       default: 0,

@@ -16,6 +16,13 @@ const PROPERTY_TYPES = [
   "Guest House",
 ];
 
+const PRICE_PERIODS = [
+  { value: "month", icon: "🗓️" },
+  { value: "week", icon: "📆" },
+  { value: "day", icon: "☀️" },
+  { value: "year", icon: "📅" },
+];
+
 export default function EditProperty() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -25,6 +32,7 @@ export default function EditProperty() {
     title: "",
     description: "",
     price: "",
+    pricePeriod: "month",
     location: "",
     bedrooms: "",
     bathrooms: "",
@@ -46,6 +54,7 @@ export default function EditProperty() {
           title: res.data.property.title,
           description: res.data.property.description,
           price: res.data.property.price,
+          pricePeriod: res.data.property.pricePeriod || "month",
           location: res.data.property.location,
           bedrooms: res.data.property.bedrooms,
           bathrooms: res.data.property.bathrooms,
@@ -168,6 +177,29 @@ export default function EditProperty() {
                 onChange={handleChange}
                 className="input"
               />
+            </div>
+
+            <div className="form-group">
+              <label className="label">⏳ {t("add.pricePeriod")}</label>
+              <div className="ptype-grid">
+                {PRICE_PERIODS.map((period) => (
+                  <button
+                    type="button"
+                    key={period.value}
+                    onClick={() =>
+                      setFormData({ ...formData, pricePeriod: period.value })
+                    }
+                    className={`ptype-option${
+                      formData.pricePeriod === period.value
+                        ? " ptype-option--active"
+                        : ""
+                    }`}
+                  >
+                    <span className="ptype-option__icon">{period.icon}</span>
+                    {t(`period.${period.value}`)}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="grid grid--3">

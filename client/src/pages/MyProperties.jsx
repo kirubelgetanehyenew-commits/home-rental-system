@@ -126,7 +126,7 @@ export default function MyProperties() {
                       <p className="mp-card__price">
                         ETB {property.price?.toLocaleString()}
                         <span className="mp-card__per">
-                          {t("details.perMonth")}
+                          {t(`price.${property.pricePeriod || "month"}`)}
                         </span>
                       </p>
 

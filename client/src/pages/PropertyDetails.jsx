@@ -303,7 +303,7 @@ export default function PropertyDetails() {
 
         <p className="details-price">
           ETB {property.price}
-          <small> {t("details.perMonth")}</small>
+          <small> {t(`price.${property.pricePeriod || "month"}`)}</small>
         </p>
 
         <div className="details-stats">
