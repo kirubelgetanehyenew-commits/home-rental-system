@@ -248,11 +248,16 @@ export default function PropertyDetails() {
     <div className="page page--details">
       <div className="container">
         {/* Image gallery */}
-        <img
-          src={images[activeImage]}
-          alt={property.title}
-          className="gallery__main"
-        />
+        <div className="pd-gallery">
+          <img
+            src={images[activeImage]}
+            alt={property.title}
+            className="gallery__main"
+          />
+          <span className="pd-gallery__count">
+            {activeImage + 1} / {images.length}
+          </span>
+        </div>
 
         {images.length > 1 && (
           <div className="gallery__thumbs">
@@ -291,7 +296,7 @@ export default function PropertyDetails() {
         </div>
 
         {averageRating > 0 && (
-          <p style={{ marginTop: 14, fontSize: 17 }}>
+          <p className="pd-rating">
             ⭐ {averageRating} · {reviews.length} {t("details.reviews")}
           </p>
         )}
@@ -303,16 +308,19 @@ export default function PropertyDetails() {
 
         <div className="details-stats">
           <div className="detail-stat">
+            <span className="detail-stat__icon">🛏</span>
             <p className="detail-stat__label">{t("details.bedrooms")}</p>
             <p className="detail-stat__value">{property.bedrooms}</p>
           </div>
 
           <div className="detail-stat">
+            <span className="detail-stat__icon">🛁</span>
             <p className="detail-stat__label">{t("details.bathrooms")}</p>
             <p className="detail-stat__value">{property.bathrooms}</p>
           </div>
 
           <div className="detail-stat">
+            <span className="detail-stat__icon">📐</span>
             <p className="detail-stat__label">{t("details.area")}</p>
             <p className="detail-stat__value">{property.area} m²</p>
           </div>

@@ -10,19 +10,24 @@ export default function PropertyCard({
 }) {
   const { t } = useLang();
 
-  const imageUrl =
-    property.images && property.images.length > 0
-      ? property.images[0]
-      : "https://placehold.co/600x400?text=No+Image";
+  const hasImage = property.images && property.images.length > 0;
 
   return (
     <div className="property-card">
-      <div className="property-card__media">
-        <img
-          src={imageUrl}
-          alt={property.title}
-          className="property-card__img"
-        />
+      <div
+        className={`property-card__media${
+          hasImage ? "" : " property-card__media--empty"
+        }`}
+      >
+        {hasImage ? (
+          <img
+            src={property.images[0]}
+            alt={property.title}
+            className="property-card__img"
+          />
+        ) : (
+          <span className="property-card__noimg">🏠</span>
+        )}
 
         {onToggleFavorite && (
           <button
@@ -39,6 +44,12 @@ export default function PropertyCard({
             {t("properties.rented")}
           </span>
         )}
+
+        {property.propertyType && (
+          <span className="property-card__type">
+            {t(`type.${property.propertyType}`)}
+          </span>
+        )}
       </div>
 
       <div className="property-card__body">
@@ -46,20 +57,26 @@ export default function PropertyCard({
           {property.title}
         </Link>
 
-        <p className="property-card__location">📍 {property.location}</p>
+        <p className="property-card__location">
+          📍 {property.location || property.city || property.address || "—"}
+        </p>
 
-        <div className="row row--between row--center">
-          <p className="property-card__price">ETB {property.price}</p>
-
-          {property.propertyType && (
-            <span className="badge badge--brand">
-              {t(`type.${property.propertyType}`)}
-            </span>
-          )}
+        <div className="property-card__specs">
+          <span>🛏 {property.bedrooms}</span>
+          <span>🛁 {property.bathrooms}</span>
+          <span>📐 {property.area} m²</span>
         </div>
 
-        <div className="row row--wrap property-card__meta">
-          <Link to={`/property/${property._id}`} className="btn btn--primary btn--sm">
+        <p className="property-card__price">
+          {Number(property.price).toLocaleString()}{" "}
+          <small>ETB {t("details.perMonth")}</small>
+        </p>
+
+        <div className="property-card__actions">
+          <Link
+            to={`/property/${property._id}`}
+            className="btn btn--primary btn--sm property-card__view"
+          >
             {t("properties.viewDetails")}
           </Link>
 
@@ -69,14 +86,14 @@ export default function PropertyCard({
                 to={`/edit-property/${property._id}`}
                 className="btn btn--outline btn--sm"
               >
-                {t("properties.edit")}
+                ✏️ {t("properties.edit")}
               </Link>
 
               <button
                 onClick={() => onDelete(property._id)}
                 className="btn btn--danger btn--sm"
               >
-                {t("properties.delete")}
+                🗑 {t("properties.delete")}
               </button>
             </>
           )}
