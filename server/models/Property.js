@@ -179,6 +179,28 @@ const propertySchema = new mongoose.Schema(
       default: "active",
     },
 
+    isPremium: {
+      type: Boolean,
+      default: false,
+    },
+    premiumRequested: {
+      type: Boolean,
+      default: false,
+    },
+    premiumFeePaid: {
+      type: Boolean,
+      default: false,
+    },
+    premiumApprovedAt: {
+      type: Date,
+      default: null,
+    },
+    premiumApprovedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
     available: {
       type: Boolean,
       default: true,

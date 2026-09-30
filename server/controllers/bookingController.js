@@ -2,6 +2,13 @@ const Booking = require("../models/Booking");
 const Property = require("../models/Property");
 const { createNotification } = require("./notificationController");
 
+const getDefaultLeaseEndDate = (bookingDate) => {
+  const baseDate = bookingDate ? new Date(bookingDate) : new Date();
+  const endDate = new Date(baseDate.getTime());
+  endDate.setDate(endDate.getDate() + 30);
+  return endDate;
+};
+
 // Create a viewing request
 const createBooking = async (req, res) => {
   try {
@@ -101,7 +108,7 @@ const updateBookingStatus = async (req, res) => {
   try {
     const { status } = req.body;
 
-    if (!["pending", "approved", "rejected", "cancelled"].includes(status)) {
+    if (!["pending", "approved", "rejected", "cancelled", "expired"].includes(status)) {
       return res
         .status(400)
         .json({ success: false, message: "Invalid booking status" });
@@ -135,6 +142,19 @@ const updateBookingStatus = async (req, res) => {
     }
 
     booking.status = status;
+
+    if (status === "approved") {
+      const requestedEndDate = req.body.leaseEndDate || req.body.endDate;
+      booking.leaseEndDate = requestedEndDate
+        ? new Date(requestedEndDate)
+        : getDefaultLeaseEndDate(booking.date);
+      booking.expiredNotified = false;
+    }
+
+    if (status === "expired") {
+      booking.expiredNotified = true;
+    }
+
     await booking.save();
 
     // Notify the tenant about the decision

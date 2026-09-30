@@ -170,6 +170,68 @@ const deleteProperty = async (req, res) => {
   }
 };
 
+// Admin can grant premium status after receiving the fixed property fee.
+const grantPremiumProperty = async (req, res) => {
+  try {
+    const property = await Property.findById(req.params.id);
+    if (!property) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Property not found" });
+    }
+
+    if (!property.premiumRequested || !property.premiumFeePaid) {
+      return res.status(400).json({
+        success: false,
+        message: "Premium listing can only be granted after the landlord pays the fixed fee and requests premium approval.",
+      });
+    }
+
+    let premiumPayment = await Payment.findOne({
+      property: property._id,
+      type: "premium",
+    });
+
+    if (premiumPayment) {
+      premiumPayment.status = "approved";
+      premiumPayment.description = premiumPayment.description || `Premium listing fee for ${property.title}`;
+      await premiumPayment.save();
+    } else {
+      premiumPayment = await Payment.create({
+        type: "premium",
+        booking: null,
+        tenant: property.owner,
+        landlord: property.owner,
+        property: property._id,
+        amount: 5000,
+        method: "bank_transfer",
+        transactionRef: `PREMIUM-${Date.now()}`,
+        screenshot: "",
+        status: "approved",
+        description: `Premium listing fee received for ${property.title}`,
+      });
+    }
+
+    property.isPremium = true;
+    property.premiumRequested = true;
+    property.premiumFeePaid = true;
+    property.premiumApprovedAt = new Date();
+    property.premiumApprovedBy = req.user._id;
+    property.status = property.status === "inactive" ? "inactive" : "active";
+
+    await property.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Premium status granted and premium fee receipt recorded.",
+      property,
+      payment: premiumPayment,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // List reports
 const getReports = async (req, res) => {
   try {
@@ -404,24 +466,35 @@ const deleteReviewAdmin = async (req, res) => {
   }
 };
 
-// Change a user's role (admin). An admin cannot change their own role.
+// Role changes are restricted to prevent administrators from altering account roles.
 const updateUserRole = async (req, res) => {
   try {
     const { role } = req.body;
+
+    if (req.user.role === "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Administrators are not allowed to change user roles.",
+      });
+    }
+
     if (!["tenant", "landlord", "admin"].includes(role)) {
       return res.status(400).json({ success: false, message: "Invalid role" });
     }
+
     if (req.params.id === req.user._id.toString()) {
       return res
         .status(403)
         .json({ success: false, message: "You cannot change your own role" });
     }
+
     const user = await User.findById(req.params.id);
     if (!user) {
       return res
         .status(404)
         .json({ success: false, message: "User not found" });
     }
+
     user.role = role;
     await user.save();
     res.status(200).json({
@@ -491,6 +564,7 @@ module.exports = {
   getProperties,
   updatePropertyStatus,
   deleteProperty,
+  grantPremiumProperty,
   getBookings,
   updateBookingStatus,
   deleteBooking,

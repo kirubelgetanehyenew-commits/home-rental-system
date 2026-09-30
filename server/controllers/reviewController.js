@@ -1,5 +1,10 @@
 const Review = require("../models/Review");
 const Property = require("../models/Property");
+const Booking = require("../models/Booking");
+
+const canTenantReviewProperty = (booking) => {
+  return !!booking && booking.status === "approved";
+};
 
 // Get reviews for a property (with rating summary)
 const getPropertyReviews = async (req, res) => {
@@ -50,6 +55,18 @@ const upsertReview = async (req, res) => {
       });
     }
 
+    const booking = await Booking.findOne({
+      property: propertyId,
+      tenant: req.user._id,
+    }).sort({ createdAt: -1 });
+
+    if (!canTenantReviewProperty(booking)) {
+      return res.status(403).json({
+        success: false,
+        message: "Only tenants with an approved booking can review this property.",
+      });
+    }
+
     const review = await Review.findOneAndUpdate(
       { property: propertyId, user: req.user._id },
       { rating, comment },
@@ -96,6 +113,7 @@ const deleteReview = async (req, res) => {
 };
 
 module.exports = {
+  canTenantReviewProperty,
   getPropertyReviews,
   upsertReview,
   deleteReview,

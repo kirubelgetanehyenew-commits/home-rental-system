@@ -1,6 +1,37 @@
 const Property = require("../models/Property");
 const Message = require("../models/Message");
 const Booking = require("../models/Booking");
+const Payment = require("../models/Payment");
+
+const PREMIUM_PROPERTY_FEE = 5000;
+
+const validatePremiumPropertyRequest = ({ role, premiumRequested, premiumFeePaid }) => {
+  if (!premiumRequested) {
+    return { valid: true, fee: PREMIUM_PROPERTY_FEE, message: "No premium requested." };
+  }
+
+  if (role !== "landlord") {
+    return {
+      valid: false,
+      fee: PREMIUM_PROPERTY_FEE,
+      message: "Only landlords can request a premium listing.",
+    };
+  }
+
+  if (!premiumFeePaid) {
+    return {
+      valid: false,
+      fee: PREMIUM_PROPERTY_FEE,
+      message: `Premium listing requires the fixed fee of ${PREMIUM_PROPERTY_FEE} ETB before the administrator can approve it.`,
+    };
+  }
+
+  return {
+    valid: true,
+    fee: PREMIUM_PROPERTY_FEE,
+    message: "Premium listing request approved for admin review.",
+  };
+};
 
 // Create Property
 const createProperty = async (req, res) => {
@@ -39,7 +70,22 @@ const createProperty = async (req, res) => {
       images,
       videos,
       status,
+      premiumRequested,
+      premiumFeePaid,
     } = req.body;
+
+    const premiumCheck = validatePremiumPropertyRequest({
+      role: req.user.role,
+      premiumRequested: !!premiumRequested,
+      premiumFeePaid: !!premiumFeePaid,
+    });
+
+    if (!premiumCheck.valid) {
+      return res.status(403).json({
+        success: false,
+        message: premiumCheck.message,
+      });
+    }
 
     const property = await Property.create({
       title,
@@ -78,9 +124,28 @@ const createProperty = async (req, res) => {
         : [],
       images: Array.isArray(images) ? images : images ? [images] : [],
       videos: Array.isArray(videos) ? videos : videos ? [videos] : [],
-      status: status || "active",
+      status: req.user.role === "landlord" ? "pending" : status || "active",
+      premiumRequested: !!premiumRequested,
+      premiumFeePaid: !!premiumFeePaid,
+      isPremium: false,
       owner: req.user._id,
     });
+
+    if (premiumRequested && premiumFeePaid) {
+      await Payment.create({
+        type: "premium",
+        booking: null,
+        tenant: req.user._id,
+        landlord: req.user._id,
+        property: property._id,
+        amount: PREMIUM_PROPERTY_FEE,
+        method: "bank_transfer",
+        transactionRef: `PREMIUM-${Date.now()}`,
+        screenshot: "",
+        status: "pending",
+        description: `Premium listing fee for ${property.title}`,
+      });
+    }
 
     res.status(201).json({
       success: true,
@@ -349,4 +414,6 @@ module.exports = {
   updateProperty,
   deleteProperty,
   getAllPropertiesAdmin,
+  validatePremiumPropertyRequest,
+  PREMIUM_PROPERTY_FEE,
 };

@@ -5,17 +5,17 @@ const paymentSchema = new mongoose.Schema(
     booking: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Booking",
-      required: true,
+      default: null,
     },
     tenant: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      default: null,
     },
     landlord: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      default: null,
     },
     property: {
       type: mongoose.Schema.Types.ObjectId,
@@ -25,6 +25,15 @@ const paymentSchema = new mongoose.Schema(
     amount: {
       type: Number,
       required: true,
+    },
+    type: {
+      type: String,
+      enum: ["booking", "premium"],
+      default: "booking",
+    },
+    description: {
+      type: String,
+      default: "",
     },
     method: {
       type: String,

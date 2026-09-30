@@ -7,6 +7,7 @@ const {
   getProperties,
   updatePropertyStatus,
   deleteProperty,
+  grantPremiumProperty,
   getBookings,
   updateBookingStatus,
   deleteBooking,
@@ -38,6 +39,7 @@ router.delete("/users/:id", deleteUser);
 // Property management
 router.get("/properties", getProperties);
 router.put("/properties/:id/status", updatePropertyStatus);
+router.put("/properties/:id/premium", grantPremiumProperty);
 router.delete("/properties/:id", deleteProperty);
 
 // Booking management

@@ -1,0 +1,6 @@
+loadError: 1218 1228 1303 12CD 1295 0020 1218 132B 1295 0020 12A0 120D 1270 127B 1208 121D
+retry: 12A5 1295 12F0 1308 1293 0020 121E 12AD 122D
+refresh: 12A5 12F5 1235
+occurrences of admin.loadError: 2
+occurrences of admin.retry: 2
+occurrences of admin.refresh: 2
