@@ -55,6 +55,8 @@ export default function AddProperty() {
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [fileInputKey, setFileInputKey] = useState(0);
+  const [premiumRequested, setPremiumRequested] = useState(false);
+  const [premiumFeePaid, setPremiumFeePaid] = useState(false);
 
   const [message, setMessage] = useState("");
 
@@ -94,6 +96,13 @@ export default function AddProperty() {
   async function handleSubmit(e) {
     e.preventDefault();
 
+    if (premiumRequested && !premiumFeePaid) {
+      setMessage(
+        "❌ Premium listing requires confirmation that the fixed fee of 5,000 ETB has been paid before admin approval."
+      );
+      return;
+    }
+
     try {
       setMessage(t("add.uploading"));
       const uploadedImages = await uploadImages();
@@ -102,6 +111,8 @@ export default function AddProperty() {
       await API.post("/properties", {
         ...formData,
         images: uploadedImages,
+        premiumRequested,
+        premiumFeePaid: premiumRequested ? premiumFeePaid : false,
       });
 
       setMessage("✅ " + t("add.success"));
@@ -296,10 +307,47 @@ export default function AddProperty() {
             </div>
           </section>
 
-          {/* Step 4 — Photos */}
+          {/* Step 4 — Premium listing */}
           <section className="form-section">
             <div className="form-section__head">
               <span className="form-step">4</span>
+              <h2>Premium listing</h2>
+            </div>
+            <div className="form-section__body form">
+              <div className="form-group">
+                <label className="checkbox-row">
+                  <input
+                    type="checkbox"
+                    checked={premiumRequested}
+                    onChange={(e) => setPremiumRequested(e.target.checked)}
+                  />
+                  <span>
+                    Request premium placement for this property after paying the fixed fee of 5,000 ETB.
+                  </span>
+                </label>
+              </div>
+
+              {premiumRequested && (
+                <div className="form-group">
+                  <label className="checkbox-row">
+                    <input
+                      type="checkbox"
+                      checked={premiumFeePaid}
+                      onChange={(e) => setPremiumFeePaid(e.target.checked)}
+                    />
+                    <span>
+                      I confirm the 5,000 ETB premium fee has been paid and the property is waiting for administrator approval.
+                    </span>
+                  </label>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Step 5 — Photos */}
+          <section className="form-section">
+            <div className="form-section__head">
+              <span className="form-step">5</span>
               <h2>{t("add.step4")}</h2>
             </div>
             <div className="form-section__body">

@@ -48,6 +48,7 @@ export default function PropertyDetails() {
   const [myRating, setMyRating] = useState(0);
   const [myComment, setMyComment] = useState("");
   const [reviewMessage, setReviewMessage] = useState("");
+  const [hasApprovedBooking, setHasApprovedBooking] = useState(false);
 
   // Report property
   const [showReport, setShowReport] = useState(false);
@@ -62,14 +63,15 @@ export default function PropertyDetails() {
 
   const isOwner = user && property && user.id === property.owner?._id;
   const canInteract = user && !isOwner;
+  const canReview = canInteract && hasApprovedBooking;
 
   useEffect(() => {
     const loadProperty = async () => {
       try {
         const res = await API.get(`/properties/${id}`);
         setProperty(res.data.property);
-      } catch (err) {
-        console.error(err);
+      } catch {
+        // Ignore property load failures while the page is loading.
       } finally {
         setLoading(false);
       }
@@ -90,15 +92,32 @@ export default function PropertyDetails() {
             setMyComment(myReview.comment);
           }
         }
-      } catch (err) {
-        console.error(err);
+      } catch {
+        // Ignore review load failures.
+      }
+    };
+
+    const loadMyBookingStatus = async () => {
+      if (!user) {
+        setHasApprovedBooking(false);
+        return;
+      }
+
+      try {
+        const res = await API.get("/bookings/my-bookings");
+        const approved = (res.data.bookings || []).some(
+          (booking) => booking.property?._id === id && booking.status === "approved"
+        );
+        setHasApprovedBooking(approved);
+      } catch {
+        setHasApprovedBooking(false);
       }
     };
 
     loadProperty();
     loadReviews();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+    loadMyBookingStatus();
+  }, [id, user]);
 
   // Check favorite status
   useEffect(() => {
@@ -106,7 +125,7 @@ export default function PropertyDetails() {
       try {
         const res = await API.get("/favorites/ids");
         setFavorited(res.data.favoritedIds.includes(id));
-      } catch (err) {
+      } catch {
         // Not logged in or request failed
       }
     };
@@ -518,7 +537,7 @@ export default function PropertyDetails() {
             {t("details.reviews")} ({reviews.length})
           </h2>
 
-          {canInteract && (
+          {canReview && (
             <form onSubmit={handleReviewSubmit} className="card" style={{ marginBottom: 24 }}>
               <h3 style={{ marginBottom: 12 }}>{t("details.writeReview")}</h3>
 
@@ -547,6 +566,12 @@ export default function PropertyDetails() {
                 {t("details.submitReview")}
               </button>
             </form>
+          )}
+
+          {canInteract && !hasApprovedBooking && !user?.role?.includes("admin") && (
+            <div className="alert alert--info" style={{ marginBottom: 24 }}>
+              You can leave a review after your booking for this property is approved.
+            </div>
           )}
 
           {!user && (

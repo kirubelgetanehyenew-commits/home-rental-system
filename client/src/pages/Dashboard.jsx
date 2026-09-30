@@ -30,6 +30,7 @@ const statusStyles = {
   approved: "badge badge--approved",
   rejected: "badge badge--rejected",
   cancelled: "badge badge--cancelled",
+  expired: "badge badge--cancelled",
 };
 
 const paymentStyles = {

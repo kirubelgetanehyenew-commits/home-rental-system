@@ -390,10 +390,10 @@ export default function Home() {
 
         {/* ---------- How it works ---------- */}
         <section className="section reveal">
-          <h2 className="section__title center">{t("home.how.title")}</h2>
+          <h2 className="section__title section__title--feature center">{t("home.how.title")}</h2>
           <div className="grid grid--3">
             {steps.map((s) => (
-              <div className="feature-card" key={s.title}>
+              <div className="feature-card feature-card--highlight" key={s.title}>
                 <div className="feature-card__icon">{s.icon}</div>
                 <h3 className="feature-card__title">{s.title}</h3>
                 <p className="feature-card__text">{s.desc}</p>
@@ -404,14 +404,14 @@ export default function Home() {
 
         {/* ---------- Why choose us ---------- */}
         <section className="section reveal">
-          <h2 className="section__title center">{t("home.whyTitle")}</h2>
+          <h2 className="section__title section__title--feature center">{t("home.whyTitle")}</h2>
           <div className="grid grid--3">
             {[
               { icon: "✅", title: t("home.verified.title"), desc: t("home.verified.desc") },
               { icon: "🔍", title: t("home.smart.title"), desc: t("home.smart.desc") },
               { icon: "🔒", title: t("home.secure.title"), desc: t("home.secure.desc") },
             ].map((card) => (
-              <div key={card.title} className="feature-card">
+              <div key={card.title} className="feature-card feature-card--soft">
                 <div className="feature-card__icon">{card.icon}</div>
                 <h3 className="feature-card__title">{card.title}</h3>
                 <p className="feature-card__text">{card.desc}</p>

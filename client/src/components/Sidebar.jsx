@@ -125,6 +125,14 @@ export default function Sidebar() {
                 {t("admin.properties")}
               </AdminSideLink>
               <AdminSideLink
+                tab="premium"
+                icon="✨"
+                active={onAdmin && currentTab === "premium"}
+                onClick={close}
+              >
+                {t("admin.premiumTab")}
+              </AdminSideLink>
+              <AdminSideLink
                 tab="bookings"
                 icon="📅"
                 active={onAdmin && currentTab === "bookings"}

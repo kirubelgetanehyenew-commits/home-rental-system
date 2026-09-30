@@ -156,7 +156,7 @@ export default function Payments() {
   return (
     <div className="page page--plain">
       <div className="container">
-        <div className="pay-hero">
+        <div className={`pay-hero ${!isLandlord ? "pay-hero--tenant" : ""}`}>
           <span className="pay-hero__icon">💳</span>
           <div>
             <h1 className="pay-hero__title">{t("payments.pageTitle")}</h1>
@@ -294,7 +294,10 @@ export default function Payments() {
           ) : (
             <div className="pay-list">
               {list.map((p) => (
-                <article key={p._id} className={`pay-card pay-card--${p.status}`}>
+                <article
+                  key={p._id}
+                  className={`pay-card pay-card--${p.status} ${!isLandlord ? "pay-card--tenant" : ""}`}
+                >
                   <header className="pay-card__head">
                     <div className="pay-card__who">
                       <span className="pay-card__avatar">
